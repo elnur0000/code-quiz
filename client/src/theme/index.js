@@ -44,8 +44,7 @@ const rawTheme = createMuiTheme({
 const fontHeader = {
   color: rawTheme.palette.text.primary,
   fontWeight: rawTheme.typography.fontWeightMedium,
-  fontFamily: rawTheme.typography.fontFamilySecondary,
-  textTransform: 'uppercase'
+  fontFamily: rawTheme.typography.fontFamilySecondary
 }
 
 const theme = {

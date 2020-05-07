@@ -2,7 +2,9 @@ import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import { Button, Typography, Grid } from '@material-ui/core'
 import backgroundImage from '../../img/coding.jpg'
-import { Link } from 'react-router-dom'
+import { Link, Redirect } from 'react-router-dom'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,8 +46,11 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.secondary.main
   }
 }))
-const Landing = () => {
+const Landing = ({ isAuthenticated }) => {
   const classes = useStyles()
+  if (isAuthenticated) {
+    return <Redirect to='/dashboard' />
+  }
   return (
     <section className={classes.root}>
       <Grid
@@ -83,4 +88,12 @@ Discover the experience
   )
 }
 
-export default Landing
+Landing.propTypes = {
+  isAuthenticated: PropTypes.bool
+}
+
+const mapStateToProps = state => ({
+  isAuthenticated: state.auth.isAuthenticated
+})
+
+export default connect(mapStateToProps)(Landing)

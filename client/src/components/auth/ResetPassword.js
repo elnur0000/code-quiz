@@ -11,7 +11,7 @@ import {
   CircularProgress
 } from '@material-ui/core'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
-import { Link as Redirect } from 'react-router-dom'
+import { Link as Redirect, useHistory } from 'react-router-dom'
 import { changePassword } from '../../actions/auth'
 import { setAlert } from '../../actions/alert'
 import PropTypes from 'prop-types'
@@ -75,6 +75,7 @@ const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match }) => 
     setLoading(true)
     await changePassword(password, match.params.token)
     setLoading(false)
+    // useHistory().push('/login')
   }
 
   if (isAuthenticated) {

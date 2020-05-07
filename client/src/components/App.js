@@ -13,15 +13,9 @@ import { Provider } from 'react-redux'
 import store from '../store'
 
 function App () {
-  const [didMount, setDidMount] = useState(false)
-
   useEffect(() => {
-    setDidMount(true)
-    if (didMount) {
-      setAuthToken(localStorage.token)
-      store.dispatch(loadUser())
-    }
-    return () => setDidMount(false)
+    setAuthToken(localStorage.token)
+    store.dispatch(loadUser())
   }, [])
   return (
     <>

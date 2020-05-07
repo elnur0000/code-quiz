@@ -4,6 +4,9 @@ import { Toolbar, AppBar, Link } from '@material-ui/core'
 import { Link as RouterLink } from 'react-router-dom'
 import logo from '../../img/vectorpaint.png'
 import clsx from 'clsx'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import { logout } from '../../actions/auth'
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -34,8 +37,44 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Navbar = () => {
+const Navbar = ({ auth: { isAuthenticated, loading }, logout }) => {
   const classes = useStyles()
+  const guestLinks = (
+    <>
+      <Link
+        color='inherit'
+        variant='h6'
+        underline='none'
+        className={classes.rightLink}
+        component={RouterLink}
+        to='/login'
+      >
+        {'Sign In'}
+      </Link>
+      <Link
+        variant='h6'
+        underline='none'
+        className={clsx(classes.rightLink, classes.linkSecondary)}
+        component={RouterLink}
+        to='/register'
+      >
+        {'Sign Up'}
+      </Link>
+    </>
+  )
+
+  const authLinks = (
+    <Link
+      variant='h6'
+      underline='none'
+      className={clsx(classes.rightLink, classes.linkSecondary)}
+      onClick={logout}
+      component={RouterLink}
+      to='/'
+    >
+      LOGOUT
+    </Link>
+  )
   return (
     <>
       <AppBar className={classes.appBar} position='fixed' color='primary'>
@@ -49,28 +88,12 @@ const Navbar = () => {
             component={RouterLink}
             to='/'
           >
-            {'codeQuiz'}
+            CODEQUIZ
           </Link>
           <div className={classes.right}>
-            <Link
-              color='inherit'
-              variant='h6'
-              underline='none'
-              className={classes.rightLink}
-              component={RouterLink}
-              to='/login'
-            >
-              {'Sign In'}
-            </Link>
-            <Link
-              variant='h6'
-              underline='none'
-              className={clsx(classes.rightLink, classes.linkSecondary)}
-              component={RouterLink}
-              to='/register'
-            >
-              {'Sign Up'}
-            </Link>
+            {(
+              <>{isAuthenticated ? authLinks : guestLinks}</>
+            )}
           </div>
         </Toolbar>
       </AppBar>
@@ -78,4 +101,16 @@ const Navbar = () => {
   )
 }
 
-export default Navbar
+Navbar.propTypes = {
+  logout: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+  auth: state.auth
+})
+
+export default connect(
+  mapStateToProps,
+  { logout }
+)(Navbar)

@@ -6,6 +6,10 @@ import Alert from '../layout/Alert'
 import PrivateRoute from './PrivateRoute'
 import ForgotPassword from '../auth/ForgotPassword'
 import ResetPassword from '../auth/ResetPassword'
+import Dashboard from '../dashboard/Dashboard'
+import TestList from '../test/TestList'
+import ProblemList from '../problem/ProblemList'
+import GroupList from '../group/GroupList'
 
 const Routes = () => {
   return (
@@ -16,7 +20,24 @@ const Routes = () => {
         <Route exact path='/login' component={Login} />
         <Route exact path='/forgot-password' component={ForgotPassword} />
         <Route exact path='/reset-password/:token' component={ResetPassword} />
-        {/* <PrivateRoute exact path='/dashboard' component={Dashboard} /> */}
+        <PrivateRoute
+          component={TestList}
+          exact
+          layout={Dashboard}
+          path='/dashboard'
+        />
+        <PrivateRoute
+          component={ProblemList}
+          exact
+          layout={Dashboard}
+          path='/problems'
+        />
+        <PrivateRoute
+          component={GroupList}
+          exact
+          layout={Dashboard}
+          path='/groups'
+        />
         <Redirect to='/' />
       </Switch>
     </div>

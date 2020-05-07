@@ -5,7 +5,6 @@ const { User } = require('../models/user')
 
 exports.protectedRoute = asyncWrapper(async (req, res, next) => {
   let token
-  console.log(next)
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
