@@ -36,14 +36,12 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2)
   }
 }))
-const Login = ({ login, isAuthenticated }) => {
+const Login = ({ login, isAuthenticated, isLoading }) => {
   const classes = useStyles()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   })
-
-  const [isLoading, setLoading] = useState(false)
 
   const { email, password } = formData
 
@@ -52,9 +50,7 @@ const Login = ({ login, isAuthenticated }) => {
 
   const onSubmit = async e => {
     e.preventDefault()
-    setLoading(true)
-    await login(email, password)
-    setLoading(false)
+    login(email, password)
   }
 
   if (isAuthenticated) {
@@ -132,11 +128,13 @@ const Login = ({ login, isAuthenticated }) => {
 
 Login.propTypes = {
   login: PropTypes.func.isRequired,
-  isAuthenticated: PropTypes.bool
+  isAuthenticated: PropTypes.bool,
+  isLoading: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.auth.isAuthenticated
+  isAuthenticated: state.auth.isAuthenticated,
+  isLoading: state.auth.loading
 })
 
 export default connect(mapStateToProps, { login })(Login)

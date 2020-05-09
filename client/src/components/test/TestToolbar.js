@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/styles'
-import { Button } from '@material-ui/core'
+import { Button, Slide } from '@material-ui/core'
+import TestAddDialog from './TestAddDialog'
 
 // import { SearchInput } from 'components'
 
@@ -27,17 +28,32 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(1)
   }
 }))
+const Transition = React.forwardRef(function Transition (props, ref) {
+  return <Slide direction='up' ref={ref} {...props} />
+})
 
 const TestToolbar = props => {
   const { className, ...rest } = props
 
   const classes = useStyles()
 
+  const [addDialogIsOpen, setAddDialogIsOpen] = useState(false)
+
+  const handleAddDialogClose = () => {
+    setAddDialogIsOpen(false)
+  }
+
   return (
     <div
       {...rest}
       className={clsx(classes.root, className)}
     >
+      <TestAddDialog
+        fullScreen
+        open={addDialogIsOpen}
+        onClose={handleAddDialogClose}
+        TransitionComponent={Transition}
+      />
       <div className={classes.row}>
         <span className={classes.spacer} />
         {/* <Button className={classes.importButton}>Import</Button> */}
@@ -45,6 +61,7 @@ const TestToolbar = props => {
         <Button
           color='secondary'
           variant='contained'
+          onClick={() => setAddDialogIsOpen(true)}
         >
           Create New Test
         </Button>

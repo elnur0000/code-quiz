@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Register = ({ setAlert, register, isAuthenticated }) => {
+const Register = ({ setAlert, register, isLoading, isAuthenticated }) => {
   const classes = useStyles()
   const [formData, setFormData] = useState({
     name: '',
@@ -49,7 +49,6 @@ const Register = ({ setAlert, register, isAuthenticated }) => {
     password2Helper: '',
     passwordHelper: ''
   })
-  const [isLoading, setLoading] = useState(false)
 
   const { name, email, password, password2, emailHelper, password2Helper, passwordHelper } = formData
 
@@ -85,9 +84,7 @@ const Register = ({ setAlert, register, isAuthenticated }) => {
   }
   const onSubmit = async e => {
     e.preventDefault()
-    setLoading(true)
-    await register({ name, email, password })
-    setLoading(false)
+    register({ name, email, password })
   }
 
   if (isAuthenticated) {
@@ -196,11 +193,13 @@ const Register = ({ setAlert, register, isAuthenticated }) => {
 Register.propTypes = {
   setAlert: PropTypes.func.isRequired,
   register: PropTypes.func.isRequired,
-  isAuthenticated: PropTypes.bool
+  isAuthenticated: PropTypes.bool,
+  isLoading: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.auth.isAuthenticated
+  isAuthenticated: state.auth.isAuthenticated,
+  isLoading: state.auth.loading
 })
 
 export default connect(

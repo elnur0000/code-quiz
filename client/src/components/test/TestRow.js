@@ -12,14 +12,13 @@ import {
   makeStyles,
   Grid,
   Tooltip,
-  Button
+  Button,
+  Slide
 
 } from '@material-ui/core'
 import MaterialTable from 'material-table'
 
 import {
-  KeyboardArrowUp as KeyboardArrowUpIcon,
-  KeyboardArrowDown as KeyboardArrowDownIcon,
   GroupAddTwoTone as GroupAddIcon,
   AssignmentTwoTone as Assignment,
   Delete as DeleteIcon
@@ -74,7 +73,7 @@ function GroupRow ({ row }) {
     ]
   })
 
-  const [inviteModalIsOpen, setInviteModalIsOpen] = useState(false)
+  const [inviteDialogIsOpen, setInviteDialogOpen] = useState(false)
   const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false)
 
   const handleConfirmationDialogOpen = () => {
@@ -84,19 +83,19 @@ function GroupRow ({ row }) {
     setConfirmationDialogIsOpen(false)
   }
 
-  const handleInviteModalOpen = () => {
-    setInviteModalIsOpen(true)
+  const handleInviteDialogOpen = () => {
+    setInviteDialogOpen(true)
   }
 
-  const handleInviteModalClose = () => {
-    setInviteModalIsOpen(false)
+  const handleInviteDialogClose = () => {
+    setInviteDialogOpen(false)
   }
 
   return (
     <>
       <TestInviteDialog
-        open={inviteModalIsOpen}
-        onClose={handleInviteModalClose}
+        open={inviteDialogIsOpen}
+        onClose={handleInviteDialogClose}
         aria-labelledby='form-dialog-title'
       />
       <ConfirmationDialog
@@ -116,7 +115,7 @@ function GroupRow ({ row }) {
             alignItems='center'
           >
             <Tooltip className={classes.inviteIcon} title='Invite Candidate'>
-              <IconButton onClick={handleInviteModalOpen} aria-label='invite'>
+              <IconButton onClick={handleInviteDialogOpen} aria-label='invite'>
                 <GroupAddIcon fontSize='large' />
               </IconButton>
             </Tooltip>
