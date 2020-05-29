@@ -9,6 +9,25 @@ const {
   UserUpdatePasswordValidationSchema
 } = require('../models/user')
 
+const {
+  ProblemValidationSchema,
+  ProblemEditValidationSchema,
+  ProblemAddTestCaseValidationSchema,
+  ProblemEditTestCaseValidationSchema
+} = require('../models/problem')
+
+const {
+  GroupValidationSchema,
+  GroupAddUserValidationSchema,
+  GroupEditUserValidationSchema
+} = require('../models/group')
+
+const {
+  TestValidationSchema,
+  TestEditValidationSchema,
+  TestInviteValidationSchema,
+  TestRunCodeValidationSchema
+} = require('../models/test')
 const validators = {
   User: {
     scopes: {
@@ -18,6 +37,29 @@ const validators = {
       resetPassword: UserResetPasswordValidationSchema,
       updateDetails: UserUpdateDetailsValidationSchema,
       updatePassword: UserUpdatePasswordValidationSchema
+    }
+  },
+  Problem: {
+    scopes: {
+      default: ProblemValidationSchema,
+      edit: ProblemEditValidationSchema,
+      addTestcase: ProblemAddTestCaseValidationSchema,
+      editTestcase: ProblemEditTestCaseValidationSchema
+    }
+  },
+  Group: {
+    scopes: {
+      default: GroupValidationSchema,
+      addUser: GroupAddUserValidationSchema,
+      editUser: GroupEditUserValidationSchema
+    }
+  },
+  Test: {
+    scopes: {
+      default: TestValidationSchema,
+      edit: TestEditValidationSchema,
+      invite: TestInviteValidationSchema,
+      runCode: TestRunCodeValidationSchema
     }
   }
 }

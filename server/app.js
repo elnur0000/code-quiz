@@ -3,24 +3,6 @@ const Middleware = require('./middleware/middleware')
 const ErrorHandlingMiddleware = require('./middleware/error-handling')
 const connectDB = require('./config/db')
 
-// const { python, cpp, java, c, node } = require('compile-run')
-// const sourcecode = `
-// public class HelloWorld{
-
-//  public static void main(String []args){
-//     System.out.println("Hello World");
-//  }
-// }
-// `
-// const resultPromise = java.runSource(sourcecode)
-// resultPromise
-//   .then(result => {
-//     console.log(result, 'done')
-//   })
-//   .catch(err => {
-//     console.log(err)
-//   })
-
 // Connect to database if it's not a test environment
 if (process.env.NODE_ENV !== 'test') connectDB()
 
@@ -28,10 +10,16 @@ const app = express()
 
 // routes
 const auth = require('./routes/auth')
+const test = require('./routes/test')
+const problem = require('./routes/problem')
+const group = require('./routes/group')
 
 Middleware(app)
 
 app.use('/api/v1/auth', auth)
+app.use('/api/v1/problems', problem)
+app.use('/api/v1/groups', group)
+app.use('/api/v1/tests', test)
 
 ErrorHandlingMiddleware(app)
 

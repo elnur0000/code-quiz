@@ -53,7 +53,7 @@ function GroupRow ({ row }) {
           <Collapse in={open} timeout='auto' unmountOnExit>
             <Box margin={1}>
               <MaterialTable
-                title='Users'
+                title='Candidates'
                 columns={state.columns}
                 data={row.users}
                 editable={{

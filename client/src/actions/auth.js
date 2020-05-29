@@ -7,11 +7,16 @@ import {
   USER_LOADED,
   AUTH_ERROR,
   LOGOUT,
+  LOADING,
   COUNTDOWN_INIT
 } from './types'
 import { setAlert } from './alert'
 
 export const register = ({ name, email, password }) => async dispatch => {
+  dispatch({
+    type: LOADING
+  })
+
   const config = {
     headers: {
       'Content-Type': 'application/json'
@@ -22,7 +27,6 @@ export const register = ({ name, email, password }) => async dispatch => {
 
   try {
     const res = await axios.post('/auth/register', body, config)
-    console.log(res)
     dispatch({
       type: REGISTER_SUCCESS,
       payload: res.data
@@ -33,12 +37,15 @@ export const register = ({ name, email, password }) => async dispatch => {
       : dispatch(setAlert('something went wrong with a server', 'error'))
 
     dispatch({
-      type: REGISTER_FAIL
+      type: AUTH_ERROR
     })
   }
 }
 
 export const loadUser = () => async (dispatch) => {
+  dispatch({
+    type: LOADING
+  })
   try {
     const res = await axios.get('/auth/me')
     dispatch({
@@ -54,6 +61,9 @@ export const loadUser = () => async (dispatch) => {
 
 // Login User
 export const login = (email, password) => async (dispatch) => {
+  dispatch({
+    type: LOADING
+  })
   const config = {
     headers: {
       'Content-Type': 'application/json'
@@ -74,12 +84,15 @@ export const login = (email, password) => async (dispatch) => {
   } catch (err) {
     dispatch(setAlert('incorrect email or password', 'error'))
     dispatch({
-      type: LOGIN_FAIL
+      type: AUTH_ERROR
     })
   }
 }
 
 export const resetPasswordRequest = email => async (dispatch) => {
+  dispatch({
+    type: LOADING
+  })
   const config = {
     headers: {
       'Content-Type': 'application/json'
@@ -104,6 +117,9 @@ export const resetPasswordRequest = email => async (dispatch) => {
 }
 
 export const changePassword = (password, resetToken) => async (dispatch) => {
+  dispatch({
+    type: LOADING
+  })
   const config = {
     headers: {
       'Content-Type': 'application/json'

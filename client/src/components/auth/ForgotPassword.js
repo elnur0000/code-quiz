@@ -46,16 +46,17 @@ const useStyles = makeStyles((theme) => ({
   // }
 }))
 
-const ForgotPassword = ({ isAuthenticated, resetPasswordRequest, tick, resetCountdown, seconds, minutes }) => {
+const ForgotPassword = ({ isAuthenticated, resetPasswordRequest, tick, resetCountdown, seconds, minutes, loading }) => {
   const classes = useStyles()
   useEffect(() => {
     return () => {
       resetCountdown()
     }
   }, [])
+
   const [email, setEmail] = useState('')
   const [emailHelper, setEmailHelper] = useState('')
-  const [isLoading, setLoading] = useState(false)
+
   const onChange = e => {
     setEmail(e.target.value)
     const valid = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(e.target.value)
@@ -71,9 +72,7 @@ const ForgotPassword = ({ isAuthenticated, resetPasswordRequest, tick, resetCoun
 
   const onSubmit = async e => {
     e.preventDefault()
-    setLoading(true)
-    await resetPasswordRequest(email)
-    setLoading(false)
+    resetPasswordRequest(email)
     startCountdown()
   }
   const startCountdown = () => {
@@ -120,9 +119,9 @@ const ForgotPassword = ({ isAuthenticated, resetPasswordRequest, tick, resetCoun
             variant='contained'
             color='secondary'
             className={classes.submit}
-            disabled={Boolean(emailHelper || !email || isLoading || seconds > 0 || minutes > 0)}
+            disabled={Boolean(emailHelper || !email || loading || seconds > 0 || minutes > 0)}
           >
-            {isLoading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} />
+            {loading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} />
               : seconds > 0 || minutes > 0 ? minutes + ':' + (seconds < 10 ? '0' : '') + seconds
                 : 'Send'}
           </Button>
@@ -148,6 +147,7 @@ const ForgotPassword = ({ isAuthenticated, resetPasswordRequest, tick, resetCoun
 
 ForgotPassword.propTypes = {
   isAuthenticated: PropTypes.bool,
+  loading: PropTypes.bool,
   resetPasswordRequest: PropTypes.func.isRequired,
   tick: PropTypes.func.isRequired,
   resetCountdown: PropTypes.func.isRequired,
@@ -157,6 +157,7 @@ ForgotPassword.propTypes = {
 
 const mapStateToProps = state => ({
   isAuthenticated: state.auth.isAuthenticated,
+  loading: state.auth.loading,
   seconds: state.countdown.seconds,
   minutes: state.countdown.minutes
 })

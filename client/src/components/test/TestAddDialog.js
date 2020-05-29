@@ -27,14 +27,12 @@ import {
 } from '@material-ui/icons'
 
 const useStyles = makeStyles((theme) => ({
-  appBar: {
-    position: 'relative'
-  },
+
   title: {
     marginLeft: theme.spacing(2),
     flex: 1
   },
-  root: {
+  problemListContainer: {
     margin: 'auto'
   },
   cardHeader: {
@@ -54,6 +52,15 @@ const useStyles = makeStyles((theme) => ({
   },
   problemCardHeader: {
     color: theme.palette.secondary.dark
+  },
+  toolbarMargin: {
+    ...theme.mixins.toolbar
+  },
+  grid: {
+    margin: theme.spacing(0),
+    flexGrow: 0,
+    maxWidth: '100%',
+    flexBasis: '100%'
   }
 }))
 
@@ -178,27 +185,31 @@ const TestAddDialog = props => {
   return (
     <Dialog {...props}>
       <Grid
-        container direction='row'
+        container
+        direction='row'
         justify='center'
-        alignItems='center' spacing={3}
+        spacing={3}
+        className={classes.grid}
+        alignItems='center'
       >
         <Grid item xs={12}>
-          <AppBar className={classes.appBar}>
+          <AppBar position='fixed' color='primary'>
             <Toolbar>
               <IconButton edge='start' color='inherit' onClick={props.onClose} aria-label='close'>
                 <CloseIcon />
               </IconButton>
               <Typography variant='body1' className={classes.title}>
-         New Test
+         Create a New Test
               </Typography>
-              <Button autoFocus color='secondary' onClick={props.onClose}>
+              <Button autoFocus variant='outlined' color='secondary' onClick={props.onClose}>
          Add
               </Button>
             </Toolbar>
           </AppBar>
         </Grid>
         <Grid item xs={10}>
-          <Grid container spacing={3}>
+          <div className={classes.toolbarMargin} />
+          <Grid container item spacing={3}>
             <Grid item xs={6}>
               <TextField
                 name='name'
@@ -212,7 +223,7 @@ const TestAddDialog = props => {
               />
             </Grid>
             <Grid item xs={6}>
-              <Grid container spacing={0}>
+              <Grid container item spacing={0}>
                 <Grid item xs={12}>
                   <Typography>Select the Programming Language:</Typography>
                 </Grid>
@@ -236,8 +247,8 @@ const TestAddDialog = props => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <Grid container spacing={2} justify='center' alignItems='center' className={classes.root}>
+        <Grid item xs={10}>
+          <Grid container item spacing={2} justify='center' alignItems='center' className={classes.problemListContainer}>
             <Grid item>{customList('Available Problems', left)}</Grid>
             <Grid item>
               <Grid container direction='column' alignItems='center'>

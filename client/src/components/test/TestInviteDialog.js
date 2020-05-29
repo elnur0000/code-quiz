@@ -41,6 +41,34 @@ const TestInviteDialog = props => {
       <DialogContent>
         <Grid container spacing={2}>
           <Grid item xs={12}>
+            <Grid container item spacing={0}>
+              <Grid item xs={6}>
+                <TextField
+                  id='datetime-local'
+                  label='Start Time'
+                  type='datetime-local'
+                  defaultValue='2017-05-24T10:30'
+                  className={classes.textField}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  id='datetime-local'
+                  label='Finish Time'
+                  type='datetime-local'
+                  defaultValue='2017-05-24T10:30'
+                  className={classes.textField}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
             <TextField
               autoFocus
               margin='dense'

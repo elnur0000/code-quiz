@@ -116,8 +116,8 @@ exports.forgotPassword = asyncWrapper(async (req, res, next) => {
     // current date + 5 mins
     res.send({ success: true, lockedUntil: user.resetRequestLockedUntil })
   } catch (err) {
-    await resetPasswordRequest.remove()
-    throw new ValidationError('Something wrong with the email service or provided email is incorrect')
+    resetPasswordRequest.remove()
+    throw new Error('Something wrong with the email service or provided email is incorrect')
   }
 })
 
@@ -130,7 +130,6 @@ exports.resetPassword = asyncWrapper(async (req, res, next) => {
     .update(req.params.resettoken)
     .digest('hex')
 
-  console.log(resetPasswordToken)
   const resetPasswordRequest = await ResetPasswordRequest.findOne({
     token: resetPasswordToken,
     expiresAt: { $gt: Date.now() }

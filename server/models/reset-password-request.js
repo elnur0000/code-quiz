@@ -10,7 +10,12 @@ const ResetPasswordRequestSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-    user: mongoose.Schema.Types.ObjectId
+    user: mongoose.Schema.Types.ObjectId,
+    createdAt: {
+      type: Date,
+      expires: '1d',
+      default: Date.now()
+    }
   }
 )
 

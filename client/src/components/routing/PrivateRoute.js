@@ -7,13 +7,13 @@ import Spinner from '../layout/Spinner'
 const PrivateRoute = ({
   component: Component,
   layout: Layout,
-  auth: { isAuthenticated, loading },
+  auth: { isAuthenticated, user },
   ...rest
 }) => (
   <Route
     {...rest}
     render={props =>
-      loading ? (
+      !user ? (
         <Spinner />
       ) : isAuthenticated ? (
         <Layout>

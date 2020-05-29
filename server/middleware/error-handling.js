@@ -12,7 +12,7 @@ function errorLogger (err, req, res, next) {
 
 function authenticationErrorHandler (err, req, res, next) {
   if (err instanceof AuthenticationError) {
-    return res.status(401).send({ error: { message: err.message } })
+    return res.status(401).send({ error: { message: (err.message || 'You are not authorized') } })
   }
   next(err)
 }
@@ -33,13 +33,13 @@ function validationErrorHandler (err, req, res, next) {
 
 function accessDeniedErrorHandler (err, req, res, next) {
   if (err instanceof AccessDeniedError) {
-    return res.status(403).send({ error: { message: err.message } })
+    return res.status(403).send({ error: { message: (err.message || 'Access denied') } })
   }
   next(err)
 }
 
 function genericErrorHandler (err, req, res, next) {
-  res.status(500).send()
+  res.status(500).send({ error: { message: (err.message || 'Something went wrong with a server') } })
   next()
 }
 

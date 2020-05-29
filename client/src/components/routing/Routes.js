@@ -10,6 +10,7 @@ import Dashboard from '../dashboard/Dashboard'
 import TestList from '../test/TestList'
 import ProblemList from '../problem/ProblemList'
 import GroupList from '../group/GroupList'
+import Problem from '../problem/Problem'
 
 const Routes = () => {
   return (
@@ -20,6 +21,7 @@ const Routes = () => {
         <Route exact path='/login' component={Login} />
         <Route exact path='/forgot-password' component={ForgotPassword} />
         <Route exact path='/reset-password/:token' component={ResetPassword} />
+        <Route exact path='/problem' component={Problem} />
         <PrivateRoute
           component={TestList}
           exact

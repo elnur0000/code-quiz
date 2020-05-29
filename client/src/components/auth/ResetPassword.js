@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match }) => {
+const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match, loading }) => {
   const classes = useStyles()
   const [formData, setFormData] = useState({
     password: '',
@@ -45,8 +45,6 @@ const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match }) => 
     password2Helper: '',
     passwordHelper: ''
   })
-
-  const [isLoading, setLoading] = useState(false)
 
   const { password, password2, password2Helper, passwordHelper } = formData
 
@@ -72,9 +70,7 @@ const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match }) => 
   }
   const onSubmit = async e => {
     e.preventDefault()
-    setLoading(true)
-    await changePassword(password, match.params.token)
-    setLoading(false)
+    changePassword(password, match.params.token)
     // useHistory().push('/login')
   }
 
@@ -130,12 +126,12 @@ const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match }) => 
           <Button
             type='submit'
             fullWidth
-            disabled={Boolean(isLoading || passwordHelper || password2Helper || !password || !password2)}
+            disabled={Boolean(loading || passwordHelper || password2Helper || !password || !password2)}
             variant='contained'
             color='secondary'
             className={classes.submit}
           >
-            {isLoading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} /> : 'Change'}
+            {loading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} /> : 'Change'}
           </Button>
 
         </form>
@@ -149,6 +145,7 @@ ResetPassword.propTypes = {
   setAlert: PropTypes.func.isRequired,
   changePassword: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool,
+  loading: PropTypes.bool,
   match: PropTypes.shape({
     params: PropTypes.shape({
       token: PropTypes.string.isRequired
@@ -157,7 +154,8 @@ ResetPassword.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.auth.isAuthenticated
+  isAuthenticated: state.auth.isAuthenticated,
+  loading: state.auth.loading
 })
 
 export default connect(

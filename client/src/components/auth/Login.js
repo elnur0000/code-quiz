@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Container,
   CssBaseline,
@@ -36,8 +36,9 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2)
   }
 }))
-const Login = ({ login, isAuthenticated, isLoading }) => {
+const Login = ({ login, isAuthenticated, loading }) => {
   const classes = useStyles()
+
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -102,9 +103,9 @@ const Login = ({ login, isAuthenticated, isLoading }) => {
               variant='contained'
               color='secondary'
               className={classes.submit}
-              disabled={Boolean(isLoading || !email || !password)}
+              disabled={Boolean(loading || !email || !password)}
             >
-              {isLoading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} /> : 'Sign In'}
+              {loading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} /> : 'Sign In'}
             </Button>
           </div>
           <Grid container>
@@ -129,12 +130,12 @@ const Login = ({ login, isAuthenticated, isLoading }) => {
 Login.propTypes = {
   login: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool,
-  isLoading: PropTypes.bool
+  loading: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
   isAuthenticated: state.auth.isAuthenticated,
-  isLoading: state.auth.loading
+  loading: state.auth.loading
 })
 
 export default connect(mapStateToProps, { login })(Login)

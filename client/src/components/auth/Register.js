@@ -38,8 +38,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Register = ({ setAlert, register, isLoading, isAuthenticated }) => {
+const Register = ({ setAlert, register, isAuthenticated, loading }) => {
   const classes = useStyles()
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -168,12 +169,12 @@ const Register = ({ setAlert, register, isLoading, isAuthenticated }) => {
             <Button
               type='submit'
               fullWidth
-              disabled={Boolean(isLoading || !name || passwordHelper || password2Helper || emailHelper || !email || !password || !password2)}
+              disabled={Boolean(loading || !name || passwordHelper || password2Helper || emailHelper || !email || !password || !password2)}
               variant='contained'
               color='secondary'
               className={classes.submit}
             >
-              {isLoading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} /> : 'Sign Up'}
+              {loading ? <CircularProgress color='secondary' size={24} className={classes.buttonProgress} /> : 'Sign Up'}
             </Button>
           </div>
           <Grid container justify='flex-end'>
@@ -194,12 +195,12 @@ Register.propTypes = {
   setAlert: PropTypes.func.isRequired,
   register: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool,
-  isLoading: PropTypes.bool
+  loading: PropTypes.bool
 }
 
 const mapStateToProps = state => ({
   isAuthenticated: state.auth.isAuthenticated,
-  isLoading: state.auth.loading
+  loading: state.auth.loading
 })
 
 export default connect(

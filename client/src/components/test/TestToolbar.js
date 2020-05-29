@@ -4,6 +4,7 @@ import clsx from 'clsx'
 import { makeStyles } from '@material-ui/styles'
 import { Button, Slide } from '@material-ui/core'
 import TestAddDialog from './TestAddDialog'
+import Transition from '../Transition'
 
 // import { SearchInput } from 'components'
 
@@ -28,9 +29,6 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(1)
   }
 }))
-const Transition = React.forwardRef(function Transition (props, ref) {
-  return <Slide direction='up' ref={ref} {...props} />
-})
 
 const TestToolbar = props => {
   const { className, ...rest } = props
@@ -41,6 +39,10 @@ const TestToolbar = props => {
 
   const handleAddDialogClose = () => {
     setAddDialogIsOpen(false)
+  }
+
+  const handleAddDialogOpen = () => {
+    setAddDialogIsOpen(true)
   }
 
   return (
@@ -61,9 +63,9 @@ const TestToolbar = props => {
         <Button
           color='secondary'
           variant='contained'
-          onClick={() => setAddDialogIsOpen(true)}
+          onClick={handleAddDialogOpen}
         >
-          Create New Test
+          Create New Problem
         </Button>
       </div>
       <div className={classes.row}>
