@@ -6,34 +6,20 @@ import {
   IconButton,
   Typography,
   Button,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Card,
-  CardContent,
   makeStyles,
-  Paper,
   Grid,
   TextField,
-  FormControlLabel,
-  Checkbox,
-  ListItemIcon,
-  CardActions,
-  CardHeader,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Chip,
-  Menu,
   Input,
   useTheme
 
 } from '@material-ui/core'
 import {
   Close as CloseIcon,
-  Delete as DeleteIcon,
   HighlightOff as HighlightOffIcon
 } from '@material-ui/icons'
 import ReactQuill from 'react-quill'
@@ -94,7 +80,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const names = [
+const skillNames = [
   'Strings',
   'Search',
   'Sorting',
@@ -113,52 +99,55 @@ const names = [
   'Recursion'
 ]
 
-function getStyles (name, personName, theme) {
+function getStyles (name, skills, theme) {
   return {
     fontWeight:
-     personName.indexOf(name) === -1
+     skills.indexOf(name) === -1
        ? theme.typography.fontWeightRegular
        : theme.typography.fontWeightMedium
   }
 }
 
-const ProblemAddDialog = props => {
+const ProblemAddDialog = ({
+  onSubmit,
+  problem,
+  isEdit,
+  ...rest
+}) => {
   const classes = useStyles()
 
-  const [age, setAge] = useState('')
+  React.useEffect(() => {
+    if (problem) {
+      setDifficulty(problem.difficulty)
+      setName(problem.name)
+      setDescription(problem.description)
+      setBody(problem.body)
+      setSkills(problem.skills)
+    }
+  }, [problem])
 
-  const [value, setValue] = useState('<p>Problem text...</p><p><strong>Input </strong></p><p>Input description...</p><p><strong>Output </strong></p><p>Output description...</p><p><strong>Example</strong></p><p><strong>Input:</strong></p><p>etc.</p><p><strong>Output:</strong></p><p>etc</p>')
+  const [difficulty, setDifficulty] = useState('Easy')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
 
-  const handleChange = (event) => {
-    setAge(event.target.value)
+  const [body, setBody] = useState('<p>Problem text...</p><p><strong>Input </strong></p><p>Input description...</p><p><strong>Output </strong></p><p>Output description...</p><p><strong>Example</strong></p><p><strong>Input:</strong></p><p>etc.</p><p><strong>Output:</strong></p><p>etc</p>')
+
+  const handleDifficultyChange = (event) => {
+    setDifficulty(event.target.value)
   }
   const theme = useTheme()
 
-  const [personName, setPersonName] = React.useState([])
+  const [skills, setSkills] = React.useState([])
 
   const handleChipChange = (event) => {
-    setPersonName(event.target.value)
+    setSkills(event.target.value)
   }
   const handleChipDelete = (value) => {
-    setPersonName(personName.filter((p) => p !== value))
+    setSkills(skills.filter((p) => p !== value))
   }
 
-  const handleChangeMultiple = (event) => {
-    const { options } = event.target
-    const value = []
-    for (let i = 0, l = options.length; i < l; i += 1) {
-      if (options[i].selected) {
-        value.push(options[i].value)
-      }
-    }
-    setPersonName(value)
-  }
-
-  // React.useEffect(() => {
-  //   focusEditor()
-  // }, [])
   return (
-    <Dialog {...props}>
+    <Dialog {...rest}>
       <Grid
         container
         direction='row'
@@ -170,14 +159,20 @@ const ProblemAddDialog = props => {
         <Grid item xs={12}>
           <AppBar position='fixed' color='primary'>
             <Toolbar>
-              <IconButton edge='start' color='inherit' onClick={props.onClose} aria-label='close'>
+              <IconButton edge='start' color='inherit' onClick={rest.onClose} aria-label='close'>
                 <CloseIcon />
               </IconButton>
               <Typography variant='body1' className={classes.title}>
          Create a New Test
               </Typography>
-              <Button autoFocus variant='outlined' color='secondary' onClick={props.onClose}>
-         Add
+              <Button
+                disabled={!difficulty || !name || !body || !skills.length}
+                autoFocus
+                variant='outlined'
+                color='secondary'
+                onClick={() => onSubmit({ difficulty, name, skills, body, description })}
+              >
+                {isEdit ? 'Save' : 'Add'}
               </Button>
             </Toolbar>
           </AppBar>
@@ -194,7 +189,8 @@ const ProblemAddDialog = props => {
                 size='small'
                 id='name'
                 label='Name'
-                // onChange={e => onChange(e)}
+                value={name}
+                onChange={e => setName(e.target.value)}
                 autoFocus
               />
             </Grid>
@@ -207,7 +203,8 @@ const ProblemAddDialog = props => {
                 size='small'
                 id='name'
                 label='Small Description'
-                // onChange={e => onChange(e)}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
               />
             </Grid>
           </Grid>
@@ -220,17 +217,14 @@ const ProblemAddDialog = props => {
                 variant='outlined'
                 className={classes.formControl}
               >
-                <InputLabel id='demo-simple-select-outlined-label'>Age</InputLabel>
+                <InputLabel id='demo-simple-select-outlined-label'>Difficulty</InputLabel>
                 <Select
                   labelId='demo-simple-select-outlined-label'
                   id='demo-simple-select-outlined'
-                  value={age}
-                  onChange={handleChange}
-                  label='Age'
+                  value={difficulty}
+                  onChange={handleDifficultyChange}
+                  label='Difficulty'
                 >
-                  <MenuItem value=''>
-                    <em>None</em>
-                  </MenuItem>
                   <MenuItem value='Easy'>Easy</MenuItem>
                   <MenuItem value='Medium'>Medium</MenuItem>
                   <MenuItem value='Hard'>Hard</MenuItem>
@@ -239,12 +233,12 @@ const ProblemAddDialog = props => {
             </Grid>
             <Grid item xs={9}>
               <FormControl fullWidth margin='dense' variant='outlined' className={classes.formControl}>
-                <InputLabel id='demo-mutiple-chip-label'>Chip</InputLabel>
+                <InputLabel id='demo-mutiple-chip-label'>Skills</InputLabel>
                 <Select
                   labelId='demo-mutiple-chip-label'
                   id='demo-mutiple-chip'
                   multiple
-                  value={personName}
+                  value={skills}
                   onChange={handleChipChange}
                   input={<Input id='select-multiple-chip' />}
                   renderValue={(selected) => (
@@ -256,7 +250,7 @@ const ProblemAddDialog = props => {
                           deleteIcon={
                             <div
                               onMouseDown={(event) => {
-                                if (!props.disabled) {
+                                if (!rest.disabled) {
                                   event.stopPropagation()
                                   handleChipDelete(value)
                                 }
@@ -285,8 +279,8 @@ const ProblemAddDialog = props => {
                   }}
                 >
 
-                  {names.map((name) => (
-                    <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
+                  {skillNames.map((name) => (
+                    <MenuItem key={name} value={name} style={getStyles(name, skills, theme)}>
                       {name}
                     </MenuItem>
                   ))}
@@ -305,8 +299,8 @@ const ProblemAddDialog = props => {
               <ReactQuill
                 theme='snow'
                 key='1'
-                value={value}
-                onChange={setValue}
+                value={body}
+                onChange={setBody}
               />
             </Grid>
           </Grid>

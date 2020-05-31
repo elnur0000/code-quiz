@@ -16,23 +16,23 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const ConfirmationDialog = props => {
+const ConfirmationDialog = ({ message, onConfirmation, ...rest }) => {
   const classes = useStyles()
   return (
     <Dialog
-      {...props}
+      {...rest}
     >
-      <DialogTitle id='alert-dialog-title'><Typography>You are about to delete this resource</Typography></DialogTitle>
+      <DialogTitle id='alert-dialog-title'><Typography>{message}</Typography></DialogTitle>
       <DialogContent>
         <DialogContentText id='alert-dialog-description'>
        Are you sure?
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={props.onClose} color='secondary'>
+        <Button onClick={rest.onClose} color='secondary'>
        No
         </Button>
-        <Button onClick={props.onClose} color='secondary' autoFocus>
+        <Button onClick={onConfirmation} color='secondary' autoFocus>
        Yes
         </Button>
       </DialogActions>

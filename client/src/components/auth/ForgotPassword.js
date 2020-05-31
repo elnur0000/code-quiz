@@ -18,6 +18,7 @@ import PropTypes from 'prop-types'
 import { resetPasswordRequest } from '../../actions/auth'
 import { tick, resetCountdown } from '../../actions/countdown'
 import store from '../../store'
+import Alert from '../layout/Alert'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -89,6 +90,7 @@ const ForgotPassword = ({ isAuthenticated, resetPasswordRequest, tick, resetCoun
   }
   return (
     <Container component='main' maxWidth='xs'>
+      <Alert />
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>

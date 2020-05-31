@@ -6,14 +6,10 @@ import {
   Collapse,
   Box,
   Typography,
-  Table,
-  TableHead,
-  TableBody,
   makeStyles,
   Grid,
   Tooltip,
-  Button,
-  Slide
+  Button
 
 } from '@material-ui/core'
 import MaterialTable from 'material-table'
@@ -23,8 +19,7 @@ import TestReportsDialog from './TestReportsDialog'
 import {
   GroupAddTwoTone as GroupAddIcon,
   AssignmentTwoTone as Assignment,
-  Delete as DeleteIcon,
-  EventNote as EventNoteIcon
+  Delete as DeleteIcon
 } from '@material-ui/icons'
 
 import TestInviteDialog from './TestInviteDialog'
@@ -125,6 +120,7 @@ function GroupRow ({ row }) {
       <ConfirmationDialog
         open={confirmationDialogIsOpen}
         onClose={handleConfirmationDialogClose}
+        message='You are about to delete this test'
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
       />

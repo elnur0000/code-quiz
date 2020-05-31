@@ -2,7 +2,6 @@ import React from 'react'
 import Register from '../auth/Register'
 import Login from '../auth/Login'
 import { Route, Switch, Redirect } from 'react-router-dom'
-import Alert from '../layout/Alert'
 import PrivateRoute from './PrivateRoute'
 import ForgotPassword from '../auth/ForgotPassword'
 import ResetPassword from '../auth/ResetPassword'
@@ -15,7 +14,6 @@ import Problem from '../problem/Problem'
 const Routes = () => {
   return (
     <div>
-      <Alert />
       <Switch>
         <Route exact path='/register' component={Register} />
         <Route exact path='/login' component={Login} />

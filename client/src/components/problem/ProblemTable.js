@@ -15,8 +15,6 @@ import {
   Typography,
   TablePagination,
   Tooltip,
-  IconButton,
-  Grid,
   Button,
   TableHead
 } from '@material-ui/core'
@@ -25,8 +23,16 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   PlayArrow as PlayIcon
-}
-  from '@material-ui/icons'
+} from '@material-ui/icons'
+import { connect } from 'react-redux'
+
+import { deleteProblem, editProblem } from '../../actions/problem'
+
+import ConfirmationDialog from '../shared-dialogs/ConfirmationDialog'
+import ProblemAddDialog from './ProblemAddDialog'
+import Transition from '../Transition'
+
+import Moment from 'react-moment'
 // import { getInitials } from 'helpers'
 
 const useStyles = makeStyles(theme => ({
@@ -48,9 +54,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const ProblemTable = props => {
-  const { className, users, ...rest } = props
-
+const ProblemTable = ({ className, editProblem, deleteProblem, problems, ...rest }) => {
   const classes = useStyles()
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -64,11 +68,61 @@ const ProblemTable = props => {
     setRowsPerPage(event.target.value)
   }
 
+  const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false)
+  const [selectedProblem, setSelectedProblem] = useState('')
+
+  const handleConfirmationDialogOpen = problem => {
+    setConfirmationDialogIsOpen(true)
+    setSelectedProblem(problem)
+  }
+  const handleConfirmationDialogClose = () => {
+    setConfirmationDialogIsOpen(false)
+    setSelectedProblem('')
+  }
+
+  const onDeleteConfirmation = () => {
+    deleteProblem(selectedProblem._id)
+    setConfirmationDialogIsOpen(false)
+  }
+
+  const [editDialogIsOpen, setEditDialogIsOpen] = useState(false)
+
+  const handleEditDialogClose = () => {
+    setEditDialogIsOpen(false)
+  }
+
+  const handleEditDialogOpen = problem => {
+    setEditDialogIsOpen(true)
+    setSelectedProblem(problem)
+  }
+
+  const handleEditProblem = problem => {
+    editProblem(selectedProblem._id, problem)
+    setEditDialogIsOpen(false)
+  }
+
   return (
     <Card
       {...rest}
       className={clsx(classes.root, className)}
     >
+      <ConfirmationDialog
+        open={confirmationDialogIsOpen}
+        onClose={handleConfirmationDialogClose}
+        message='You are about to delete this problem'
+        onConfirmation={onDeleteConfirmation}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      />
+      <ProblemAddDialog
+        fullScreen
+        isEdit
+        problem={selectedProblem}
+        open={editDialogIsOpen}
+        onClose={handleEditDialogClose}
+        onSubmit={handleEditProblem}
+        TransitionComponent={Transition}
+      />
       <CardContent className={classes.content}>
         <div className={classes.inner}>
           <Table>
@@ -83,28 +137,28 @@ const ProblemTable = props => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.slice(0, rowsPerPage).map(user => (
+              {problems.slice(0, rowsPerPage).map(problem => (
                 <TableRow
                   className={classes.tableRow}
                   hover
-                  key={user.id}
+                  key={problem._id}
                 >
                   <TableCell component='th' scope='row'>
-                    <Typography>Square Problem</Typography>
+                    <Typography>{problem.name}</Typography>
                   </TableCell>
 
                   <TableCell align='center'>
-                    <Typography>Easy</Typography>
+                    <Typography>{problem.difficulty}</Typography>
                   </TableCell>
 
                   <TableCell align='center'>
-                    <Typography>1</Typography>
+                    <Typography>{problem.testcases.length}</Typography>
                   </TableCell>
                   <TableCell align='center'>
-                    <Typography>Private</Typography>
+                    <Typography>{problem.isPublic ? 'Public' : 'Private'}</Typography>
                   </TableCell>
                   <TableCell align='center'>
-                    <Typography>May 06, 2020</Typography>
+                    <Typography><Moment date={problem.createdAt} format='D MMM YYYY' /></Typography>
                   </TableCell>
                   <TableCell className={classes.rowActions} align='center'>
                     <Tooltip title='Try it' aria-label='try'>
@@ -113,12 +167,12 @@ const ProblemTable = props => {
                       </Button>
                     </Tooltip>
                     <Tooltip title='Edit' aria-label='edit'>
-                      <Button color='secondary'>
+                      <Button onClick={() => handleEditDialogOpen(problem)} color='secondary'>
                         <EditIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title='Delete' aria-label='delete'>
-                      <Button color='secondary'>
+                      <Button onClick={() => handleConfirmationDialogOpen(problem)} color='secondary'>
                         <DeleteIcon />
                       </Button>
                     </Tooltip>
@@ -133,7 +187,7 @@ const ProblemTable = props => {
       <CardActions className={classes.actions}>
         <TablePagination
           component='div'
-          count={users.length}
+          count={problems.length}
           onChangePage={handlePageChange}
           onChangeRowsPerPage={handleRowsPerPageChange}
           page={page}
@@ -147,7 +201,8 @@ const ProblemTable = props => {
 
 ProblemTable.propTypes = {
   className: PropTypes.string,
-  users: PropTypes.array.isRequired
+  problems: PropTypes.array.isRequired,
+  deleteProblem: PropTypes.func.isRequired
 }
 
-export default ProblemTable
+export default connect(null, { deleteProblem, editProblem })(ProblemTable)

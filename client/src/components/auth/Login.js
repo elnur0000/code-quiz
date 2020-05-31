@@ -16,6 +16,7 @@ import { Link as RouterLink, Redirect } from 'react-router-dom'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
 import { login } from '../../actions/auth'
+import Alert from '../layout/Alert'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -59,6 +60,7 @@ const Login = ({ login, isAuthenticated, loading }) => {
   }
   return (
     <Container component='main' maxWidth='xs'>
+      <Alert />
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>

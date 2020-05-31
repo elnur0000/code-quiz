@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
+import { connect } from 'react-redux'
+
 import { makeStyles } from '@material-ui/styles'
 import { Button } from '@material-ui/core'
 import ProblemAddDialog from './ProblemAddDialog'
 import Transition from '../Transition'
-
-// import { SearchInput } from 'components'
+import { addProblem } from '../../actions/problem'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -30,9 +31,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const ProblemToolbar = props => {
-  const { className, ...rest } = props
-
+const ProblemToolbar = ({ className, addProblem, ...rest }) => {
   const classes = useStyles()
 
   const [addDialogIsOpen, setAddDialogIsOpen] = useState(false)
@@ -45,12 +44,18 @@ const ProblemToolbar = props => {
     setAddDialogIsOpen(true)
   }
 
+  const handleAddProblem = (problem) => {
+    addProblem(problem)
+    setAddDialogIsOpen(false)
+  }
+
   return (
     <>
       <ProblemAddDialog
         fullScreen
         open={addDialogIsOpen}
         onClose={handleAddDialogClose}
+        onSubmit={handleAddProblem}
         TransitionComponent={Transition}
       />
       <div
@@ -81,7 +86,7 @@ const ProblemToolbar = props => {
 }
 
 ProblemToolbar.propTypes = {
-  className: PropTypes.string
+  addProblem: PropTypes.func.isRequired
 }
 
-export default ProblemToolbar
+export default connect(null, { addProblem })(ProblemToolbar)

@@ -3,6 +3,7 @@ const { sendEmail } = require('../utilities/mailer')
 const { User } = require('../models/user')
 const { Problem } = require('../models/problem')
 const { AuthenticationError, ValidationError, NotFoundError } = require('../errors')
+const runCode = require('../services/compile-run')
 
 // @desc      Create a problem
 // @route     POST /api/v1/problems
@@ -24,7 +25,7 @@ exports.getProblems = asyncWrapper(async (req, res, next) => {
     ]
   })
     .skip(offset || 0)
-    .limit(limit || Infinity)
+    .limit(limit || 0)
     .exec()
   res.send(problems)
 })
@@ -47,6 +48,37 @@ exports.getProblem = asyncWrapper(async (req, res, next) => {
   }).exec()
   if (!problem) throw new NotFoundError('Problem not found')
   res.send(problem)
+})
+
+// @desc      Submit a demo problem
+// @route     POST /api/v1/problems/:id/submit
+// @access    Private
+exports.submitProblem = asyncWrapper(async (req, res, next) => {
+  const { code, language } = req.body
+  const _id = req.params.id
+
+  const problem = await Problem.findOne({
+    _id,
+    $or: [
+      {
+        createdBy: req.user._id
+      },
+      {
+        status: 'Public'
+      }
+    ]
+  }).exec()
+  if (!problem) throw new NotFoundError('Problem not found')
+  const resultPromises = problem.testCases.map(testCase => runCode(language, testCase.input, code))
+
+  const results = await Promise.all(resultPromises)
+
+  for (const result of results) {
+    if (result.stderr) {
+      return res.send({ success: false, stderr: result.stderr })
+    }
+  }
+  res.send({ success: true })
 })
 
 // @desc      edit a problem

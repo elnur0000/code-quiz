@@ -16,6 +16,7 @@ import { changePassword } from '../../actions/auth'
 import { setAlert } from '../../actions/alert'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
+import Alert from '../layout/Alert'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -80,6 +81,7 @@ const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match, loadi
 
   return (
     <Container component='main' maxWidth='xs'>
+      <Alert />
       <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>

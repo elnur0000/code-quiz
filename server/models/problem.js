@@ -118,24 +118,27 @@ module.exports = {
     name: Joi.string().max(50).optional(),
     description: Joi.string().max(300).optional(),
     difficulty: Joi.string().valid(['Easy', 'Medium', 'Hard']).optional(),
-    skills: Joi.string().valid([
-      'Strings',
-      'Search',
-      'Sorting',
-      'Bit Manipulation',
-      'Data Structures',
-      'Stacks',
-      'Trees',
-      'Graph Theory',
-      'Linked Lists',
-      'Queues',
-      'Geometry',
-      'Probability',
-      'Mathematics',
-      'Dynamic Programming',
-      'Divide and Conquer',
-      'Recursion'
-    ]).optional()
+    skills: Joi.array().items(
+      Joi.string().valid(
+        [
+          'Strings',
+          'Search',
+          'Sorting',
+          'Bit Manipulation',
+          'Data Structures',
+          'Stacks',
+          'Trees',
+          'Graph Theory',
+          'Linked Lists',
+          'Queues',
+          'Geometry',
+          'Probability',
+          'Mathematics',
+          'Dynamic Programming',
+          'Divide and Conquer',
+          'Recursion'
+        ]
+      )).optional()
   }).min(1),
   ProblemAddTestCaseValidationSchema: Joi.object().keys({
     input: Joi.string().required(),
