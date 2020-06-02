@@ -7,14 +7,14 @@ import {
   USER_LOADED,
   AUTH_ERROR,
   LOGOUT,
-  LOADING,
+  AUTH_LOADING,
   COUNTDOWN_INIT
 } from './types'
 import { setAlert } from './alert'
 
 export const register = ({ name, email, password }) => async dispatch => {
   dispatch({
-    type: LOADING
+    type: AUTH_LOADING
   })
 
   const config = {
@@ -44,7 +44,7 @@ export const register = ({ name, email, password }) => async dispatch => {
 
 export const loadUser = () => async (dispatch) => {
   dispatch({
-    type: LOADING
+    type: AUTH_LOADING
   })
   try {
     const res = await axios.get('/auth/me')
@@ -62,7 +62,7 @@ export const loadUser = () => async (dispatch) => {
 // Login User
 export const login = (email, password) => async (dispatch) => {
   dispatch({
-    type: LOADING
+    type: AUTH_LOADING
   })
   const config = {
     headers: {
@@ -91,7 +91,7 @@ export const login = (email, password) => async (dispatch) => {
 
 export const resetPasswordRequest = email => async (dispatch) => {
   dispatch({
-    type: LOADING
+    type: AUTH_LOADING
   })
   const config = {
     headers: {
@@ -118,7 +118,7 @@ export const resetPasswordRequest = email => async (dispatch) => {
 
 export const changePassword = (password, resetToken) => async (dispatch) => {
   dispatch({
-    type: LOADING
+    type: AUTH_LOADING
   })
   const config = {
     headers: {

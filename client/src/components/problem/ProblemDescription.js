@@ -10,6 +10,8 @@ import {
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import ProblemDescriptionFooter from './ProblemDescriptionFooter'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.bubble.css'
 
 const drawerWidth = '42.5%'
 
@@ -89,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const ProblemDescription = (props) => {
+const ProblemDescription = ({ open, handleDrawerClose, problem }) => {
   const classes = useStyles()
   const theme = useTheme()
   return (
@@ -97,34 +99,41 @@ const ProblemDescription = (props) => {
       className={classes.drawer}
       variant='persistent'
       anchor='left'
-      open={props.open}
+      open={open}
       classes={{
         paper: classes.drawerPaper
       }}
     >
       <div className={classes.drawerHeader}>
 
-        <Typography variant='subtitle1'>1. Two Sum <Typography style={{ color: 'green', textAlign: 'left', marginLeft: '0.5rem' }}>Easy</Typography></Typography>
+        <Typography variant='subtitle1'>{problem.name}
+          <Typography
+            style={
+              {
+                color: problem.difficulty === 'Easy' ? 'green' : problem.difficulty === 'Medium' ? 'orange' : 'red',
+                textAlign: 'left',
+                marginLeft: '0.5rem'
+              }
+            }
+          >{problem.difficulty}
+          </Typography>
+        </Typography>
 
-        <IconButton onClick={props.handleDrawerClose}>
+        <IconButton onClick={handleDrawerClose}>
           {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </div>
 
       <Divider />
-      <div className={classes.problemBody}>
-  Write a program to print the square of an inputted integer.<br />
-        <br />
-For example,<br />
-        <br />
-For the input provided as follows to the program:<br />
-        <br />
-3<br />
-        <br />
-The output of the program will be:<br />
-        <br />
-9
-      </div>
+      {/* <div className={classes.problemBody}> */}
+      <ReactQuill
+        theme='bubble'
+        key='1'
+        value={problem.body}
+        readOnly
+      />
+
+      {/* </div> */}
       <ProblemDescriptionFooter />
     </Drawer>
   )

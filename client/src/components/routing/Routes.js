@@ -19,7 +19,11 @@ const Routes = () => {
         <Route exact path='/login' component={Login} />
         <Route exact path='/forgot-password' component={ForgotPassword} />
         <Route exact path='/reset-password/:token' component={ResetPassword} />
-        <Route exact path='/problem' component={Problem} />
+        <PrivateRoute
+          component={Problem}
+          exact
+          path='/problem/:id'
+        />
         <PrivateRoute
           component={TestList}
           exact

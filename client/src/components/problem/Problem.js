@@ -1,31 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import clsx from 'clsx'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
-import {
-  Typography,
-  Grid,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Select
-} from '@material-ui/core'
-import Drawer from '@material-ui/core/Drawer'
+import { makeStyles } from '@material-ui/core/styles'
+
 import CssBaseline from '@material-ui/core/CssBaseline'
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import List from '@material-ui/core/List'
-import Divider from '@material-ui/core/Divider'
-import IconButton from '@material-ui/core/IconButton'
-import MenuIcon from '@material-ui/icons/Menu'
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
-import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemText from '@material-ui/core/ListItemText'
-import InboxIcon from '@material-ui/icons/MoveToInbox'
-import MailIcon from '@material-ui/icons/Mail'
-import AceEditor from 'react-ace'
-import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import CodeEditor from '../code-editor/CodeEditor'
 
 import 'ace-builds/src-noconflict/theme-github'
@@ -38,8 +15,11 @@ import 'ace-builds/src-noconflict/mode-python'
 import 'ace-builds/src-noconflict/mode-c_cpp'
 import 'ace-builds/src-noconflict/mode-javascript'
 import ProblemDescription from './ProblemDescription'
-import ProblemDescriptionFooter from './ProblemDescriptionFooter'
-
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+import { getProblem } from '../../actions/problem'
+import Spinner from '../layout/Spinner'
+import { runCode, submitProblem } from '../../actions/editor'
 const drawerWidth = '42.5%'
 
 const useStyles = makeStyles((theme) => ({
@@ -118,17 +98,19 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-export default function PersistentDrawerLeft () {
+const Problem = ({ runCode, match, getProblem, submitProblem, problem }) => {
   const classes = useStyles()
-  const theme = useTheme()
+
+  useEffect(() => {
+    getProblem(match.params.id)
+  }, [])
+
   const [open, setOpen] = useState(true)
   const [code, setCode] = useState('')
 
-  function onChange (newValue) {
+  function handleCodeChange (newValue) {
     setCode(newValue)
   }
-
-  const [language, setLanguage] = React.useState('java')
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -138,9 +120,20 @@ export default function PersistentDrawerLeft () {
     setOpen(false)
   }
 
+  const handleRunCode = (language, stdin) => {
+    runCode(stdin, code, language)
+  }
+
+  const handleSubmitCode = (language) => {
+    submitProblem(match.params.id, code, language)
+  }
+
+  if (!problem) {
+    return <Spinner />
+  }
   return (
     <div className={classes.root}>
-      <ProblemDescription handleDrawerClose={handleDrawerClose} open={open} />
+      <ProblemDescription problem={problem} handleDrawerClose={handleDrawerClose} open={open} />
 
       <main
         className={clsx(classes.content, {
@@ -148,9 +141,24 @@ export default function PersistentDrawerLeft () {
         })}
       >
         <CssBaseline />
-        <CodeEditor code={code} handleDrawerOpen={handleDrawerOpen} open={open} onChange={onChange} />
+        <CodeEditor handleSubmitCode={handleSubmitCode} handleRunCode={handleRunCode} code={code} handleDrawerOpen={handleDrawerOpen} open={open} onChange={handleCodeChange} />
 
       </main>
     </div>
   )
 }
+
+Problem.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.string.isRequired
+    })
+  }),
+  getProblem: PropTypes.func.isRequired
+}
+
+const mapStateToProps = state => ({
+  problem: state.problem.problem
+})
+
+export default connect(mapStateToProps, { getProblem, runCode, submitProblem })(Problem)

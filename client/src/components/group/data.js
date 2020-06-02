@@ -5,7 +5,9 @@ export default [
     id: uuid(),
     name: 'CST001',
     users: [{
-      name: 'elnur norzalovi',
+      name: `1 2 3 4
+      2 3
+      `,
       email: 'e_norzalovi@cu.edu.ge'
     }],
     createdAt: 1555016400000

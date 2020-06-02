@@ -8,7 +8,8 @@ const {
   editTestcase,
   getTestcases,
   deleteTestcase,
-  deleteProblem
+  deleteProblem,
+  submitProblem
 } = require('../controllers/problem-controller')
 const { protectedRoute } = require('../middleware/auth')
 const { validator } = require('../middleware/validator')
@@ -26,6 +27,9 @@ router
   .get(getProblem)
   .put(validator('Problem', 'edit'), editProblem)
   .delete(deleteProblem)
+
+router
+  .post('/:id/submit', submitProblem)
 
 // testcase
 router

@@ -6,7 +6,7 @@ const { Candidate } = require('../models/candidate')
 const { AuthenticationError, ValidationError, NotFoundError } = require('../errors')
 const { sendEmail } = require('../utilities/mailer')
 const { testInvitationTemplate } = require('../utilities/email-templates')
-const runCode = require('../services/compile-run')
+const { runCode } = require('../services/compile-run')
 
 // @desc      Create a group
 // @route     POST /api/v1/tests
@@ -135,7 +135,9 @@ exports.invite = asyncWrapper(async (req, res, next) => {
 exports.runCode = asyncWrapper(async (req, res, next) => {
   const { stdin, code, language } = req.body
   const result = await runCode(language, stdin, code)
-
+  if (result.stderr) {
+    result.stderr = result.stderr.slice(result.stderr.indexOf(',') + 1)
+  }
   res.send(result)
 })
 

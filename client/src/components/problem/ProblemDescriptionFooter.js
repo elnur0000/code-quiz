@@ -47,7 +47,9 @@ const useStyles = makeStyles((theme) => ({
   },
   toolbar: {
     minHeight: '2rem',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    backgroundColor: 'white'
+
   },
   grow: {
     flexGrow: 1
@@ -77,6 +79,7 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.enteringScreen
     })
   }
+
 }))
 
 const CodeEditorFooter = (props) => {
@@ -96,7 +99,7 @@ const CodeEditorFooter = (props) => {
 
   return (
     <AppBar
-      position='fixed' color='white' className={classes.appBar}
+      position='fixed' color='default' className={classes.appBar}
     >
       <Toolbar className={classes.toolbar}>
         <MobileStepper

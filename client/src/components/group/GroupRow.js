@@ -9,6 +9,8 @@ import {
   Table,
   TableHead,
   TableBody,
+  TextField,
+  TextareaAutosize,
   makeStyles
 } from '@material-ui/core'
 import MaterialTable from 'material-table'

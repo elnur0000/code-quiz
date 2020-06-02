@@ -3,7 +3,7 @@ import {
   LOGIN_SUCCESS,
   USER_LOADED,
   AUTH_ERROR,
-  LOADING,
+  AUTH_LOADING,
   LOGOUT
 } from '../actions/types'
 
@@ -32,7 +32,7 @@ export default function (state = initialState, action) {
         loading: false,
         user: payload
       }
-    case LOADING:
+    case AUTH_LOADING:
       return {
         ...state,
         loading: true

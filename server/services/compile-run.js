@@ -1,6 +1,6 @@
 const { python, cpp, java, c, node } = require('compile-run')
 
-module.exports = (language, stdin, code) => {
+exports.runCode = (language, stdin, code) => {
   switch (language) {
     case 'python':
       return python.runSource(code, { stdin })
@@ -16,5 +16,17 @@ module.exports = (language, stdin, code) => {
 
     case 'node':
       return node.runSource(code, { stdin })
+  }
+}
+
+exports.runCodeAgainstTestcase = async (language, stdin, code, expectedStdout) => {
+  const result = await this.runCode(language, stdin, code)
+  if (result.sterr) return result
+  console.log(result.stdout, expectedStdout)
+  return {
+    passed: result.stdout.trim() === expectedStdout.trim(),
+    stdin,
+    expectedStdout,
+    ...result
   }
 }

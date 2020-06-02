@@ -125,9 +125,9 @@ const CodeEditorToolbar = ({
             >
               <MenuItem value='java'>Java</MenuItem>
               <MenuItem value='python'>Python</MenuItem>
-              <MenuItem value='c_cpp'>C++</MenuItem>
+              <MenuItem value='cpp'>C++</MenuItem>
               <MenuItem value='javascript'>Node.js</MenuItem>
-              <MenuItem value='c_cpp'>C</MenuItem>
+              <MenuItem value='c'>C</MenuItem>
             </Select>
           </FormControl>
           <IconButton onClick={handleClickOpen}>

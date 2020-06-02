@@ -79,6 +79,14 @@ ProblemSchema.methods.deleteTestcase = function (_id) {
   this.testcases = this.testcases.filter(testcase => testcase._id.toString() !== _id)
 }
 
+ProblemSchema.methods.updateTestcase = function (testcaseId, doc) {
+  const testcaseIndex = this.testcases.findIndex(testcase => testcase._id.toString() === testcaseId)
+
+  for (const key in doc) {
+    this.testcases[testcaseIndex][key] = doc[key]
+  }
+}
+
 ProblemSchema.methods.groupInvite = function (_id) {
   this.testcases = this.testcases.filter(testcase => testcase._id.toString() !== _id)
 }

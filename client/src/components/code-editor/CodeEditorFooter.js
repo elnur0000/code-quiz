@@ -1,26 +1,19 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { Button, Collapse } from '@material-ui/core'
-import { PlayArrow as PlayIcon } from '@material-ui/icons'
-import AppBar from '@material-ui/core/AppBar'
-import CssBaseline from '@material-ui/core/CssBaseline'
-import Toolbar from '@material-ui/core/Toolbar'
-import Typography from '@material-ui/core/Typography'
-import IconButton from '@material-ui/core/IconButton'
-import Paper from '@material-ui/core/Paper'
-import Fab from '@material-ui/core/Fab'
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemAvatar from '@material-ui/core/ListItemAvatar'
-import ListItemText from '@material-ui/core/ListItemText'
-import ListSubheader from '@material-ui/core/ListSubheader'
-import Avatar from '@material-ui/core/Avatar'
-import MenuIcon from '@material-ui/icons/Menu'
-import AddIcon from '@material-ui/icons/Add'
-import SearchIcon from '@material-ui/icons/Search'
-import MoreIcon from '@material-ui/icons/MoreVert'
-import ArrowDropUpIcon from '@material-ui/icons/ArrowDropUp'
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown'
+import {
+  Button,
+  LinearProgress,
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton
+} from '@material-ui/core'
+import {
+  PlayArrow as PlayIcon,
+  ArrowDropDown as ArrowDropDownIcon,
+  ArrowDropUp as ArrowDropUpIcon
+} from '@material-ui/icons'
+import { connect } from 'react-redux'
 import clsx from 'clsx'
 
 const useStyles = makeStyles((theme) => ({
@@ -74,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const CodeEditorFooter = ({ open, setResultIsOpen, resultIsOpen }) => {
+const CodeEditorFooter = ({ handleSubmitCode, setTabIndex, code, editor, stdin, language, handleRunCode, open, setResultIsOpen, resultIsOpen }) => {
   const classes = useStyles()
   const handleConsoleToggle = (e) => {
     setResultIsOpen(!resultIsOpen)
@@ -87,22 +80,59 @@ const CodeEditorFooter = ({ open, setResultIsOpen, resultIsOpen }) => {
     >
       <Toolbar className={classes.toolbar}>
 
-        <Button onClick={handleConsoleToggle} style={{ textTransform: 'none', color: 'white' }} variant='text'>Console</Button>
-        <IconButton onClick={handleConsoleToggle} edge='start' color='inherit' aria-label='open drawer'>
-          {resultIsOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-        </IconButton>
+        {!editor.loading
+          ? <>
+            <Button onClick={handleConsoleToggle} style={{ textTransform: 'none', color: 'white' }} variant='text'>Console</Button>
+            <IconButton onClick={handleConsoleToggle} edge='start' color='inherit' aria-label='open drawer'>
+              {resultIsOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+            </IconButton>
+          </>
+          : <LinearProgress style={{ width: '10rem' }} variant='query' color='secondary' />}
+
         <div className={classes.grow} />
-        <Button style={{ textTransform: 'none' }} edge='end' size='small' variant='contained' className={classes.runButton}>
-          <PlayIcon fontSize='small' />
-          <Typography variant='body2'>Run Code</Typography>
-        </Button>
-        <Button style={{ textTransform: 'none' }} edge='end' size='small' variant='contained' color='secondary'>
-          <Typography variant='body2'> Submit</Typography>
-        </Button>
+        {
+          !editor.loading && code
+            ? <>
+              <Button
+                disabled={editor.loading} onClick={
+                  () => {
+                    handleRunCode(language, stdin)
+                    setResultIsOpen(true)
+                    setTabIndex(1)
+                }
+                } style={{ textTransform: 'none' }} edge='end' size='small' variant='contained' className={classes.runButton}
+              >
+                <PlayIcon fontSize='small' />
+                <Typography variant='body2'>Run Code</Typography>
+              </Button>
+              <Button
+                onClick={
+                  () => {
+                    handleSubmitCode(language)
+                    setResultIsOpen(true)
+                    setTabIndex(1)
+                }
+                }
+                disabled={editor.loading}
+                style={{ textTransform: 'none' }}
+                edge='end'
+                size='small'
+                variant='contained'
+                color='secondary'
+              >
+                <Typography variant='body2'> Submit</Typography>
+              </Button>
+              </>
+            : null
+        }
 
       </Toolbar>
     </AppBar>
   )
 }
 
-export default CodeEditorFooter
+const mapStateToProps = state => ({
+  editor: state.editor
+})
+
+export default connect(mapStateToProps)(CodeEditorFooter)

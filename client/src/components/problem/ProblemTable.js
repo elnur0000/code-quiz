@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, Fragment } from 'react'
 import clsx from 'clsx'
 import PropTypes from 'prop-types'
 // import moment from 'moment'
@@ -31,6 +31,9 @@ import { deleteProblem, editProblem } from '../../actions/problem'
 import ConfirmationDialog from '../shared-dialogs/ConfirmationDialog'
 import ProblemAddDialog from './ProblemAddDialog'
 import Transition from '../Transition'
+import { useHistory } from 'react-router-dom'
+import PostAddIcon from '@material-ui/icons/PostAdd'
+import TestcaseTable from './TestcaseTable'
 
 import Moment from 'react-moment'
 // import { getInitials } from 'helpers'
@@ -59,6 +62,7 @@ const ProblemTable = ({ className, editProblem, deleteProblem, problems, ...rest
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [page, setPage] = useState(0)
+  const history = useHistory()
 
   const handlePageChange = (event, page) => {
     setPage(page)
@@ -86,6 +90,7 @@ const ProblemTable = ({ className, editProblem, deleteProblem, problems, ...rest
   }
 
   const [editDialogIsOpen, setEditDialogIsOpen] = useState(false)
+  const [testcaseTableIsOpen, setTestcaseTableIsOpen] = useState(false)
 
   const handleEditDialogClose = () => {
     setEditDialogIsOpen(false)
@@ -138,48 +143,60 @@ const ProblemTable = ({ className, editProblem, deleteProblem, problems, ...rest
             </TableHead>
             <TableBody>
               {problems.slice(0, rowsPerPage).map(problem => (
-                <TableRow
-                  className={classes.tableRow}
-                  hover
-                  key={problem._id}
-                >
-                  <TableCell component='th' scope='row'>
-                    <Typography>{problem.name}</Typography>
-                  </TableCell>
+                <Fragment key={problem._id}>
+                  <TableRow
+                    className={classes.tableRow}
+                    hover
 
-                  <TableCell align='center'>
-                    <Typography>{problem.difficulty}</Typography>
-                  </TableCell>
+                  >
+                    <TableCell component='th' scope='row'>
+                      <Typography>{problem.name}</Typography>
+                    </TableCell>
 
-                  <TableCell align='center'>
-                    <Typography>{problem.testcases.length}</Typography>
-                  </TableCell>
-                  <TableCell align='center'>
-                    <Typography>{problem.isPublic ? 'Public' : 'Private'}</Typography>
-                  </TableCell>
-                  <TableCell align='center'>
-                    <Typography><Moment date={problem.createdAt} format='D MMM YYYY' /></Typography>
-                  </TableCell>
-                  <TableCell className={classes.rowActions} align='center'>
-                    <Tooltip title='Try it' aria-label='try'>
-                      <Button color='secondary'>
-                        <PlayIcon />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title='Edit' aria-label='edit'>
-                      <Button onClick={() => handleEditDialogOpen(problem)} color='secondary'>
-                        <EditIcon />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title='Delete' aria-label='delete'>
-                      <Button onClick={() => handleConfirmationDialogOpen(problem)} color='secondary'>
-                        <DeleteIcon />
-                      </Button>
-                    </Tooltip>
+                    <TableCell align='center'>
+                      <Typography>{problem.difficulty}</Typography>
+                    </TableCell>
 
-                  </TableCell>
-                </TableRow>
+                    <TableCell align='center'>
+                      <Typography>{problem.testcases.length}</Typography>
+                    </TableCell>
+                    <TableCell align='center'>
+                      <Typography>{problem.isPublic ? 'Public' : 'Private'}</Typography>
+                    </TableCell>
+                    <TableCell align='center'>
+                      <Typography><Moment date={problem.createdAt} format='D MMM YYYY' /></Typography>
+                    </TableCell>
+                    <TableCell className={classes.rowActions} align='center'>
+                      <Tooltip onClick={() => setTestcaseTableIsOpen(!testcaseTableIsOpen)} title='Manage testcases' aria-label='try'>
+                        <Button color='secondary'>
+                          <PostAddIcon />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip onClick={() => history.push(`/problem/${problem._id}`)} title='Try it' aria-label='try'>
+                        <Button color='secondary'>
+                          <PlayIcon />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title='Edit' aria-label='edit'>
+                        <Button onClick={() => handleEditDialogOpen(problem)} color='secondary'>
+                          <EditIcon />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip title='Delete' aria-label='delete'>
+                        <Button onClick={() => handleConfirmationDialogOpen(problem)} color='secondary'>
+                          <DeleteIcon />
+                        </Button>
+                      </Tooltip>
+
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TestcaseTable testcaseTableIsOpen={testcaseTableIsOpen} problem={problem} />
+
+                  </TableRow>
+                </Fragment>
               ))}
+
             </TableBody>
           </Table>
         </div>

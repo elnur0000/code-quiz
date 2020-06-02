@@ -12,6 +12,8 @@ import Box from '@material-ui/core/Box'
 import AceEditor from 'react-ace'
 import 'ace-builds/src-noconflict/theme-tomorrow'
 import 'ace-builds/src-noconflict/mode-markdown'
+import { connect } from 'react-redux'
+import Alert from '@material-ui/lab/Alert'
 
 function TabPanel (props) {
   const { children, value, index, ...other } = props
@@ -116,24 +118,19 @@ const useStyles = makeStyles((theme) => ({
 
 }))
 
-export default function CodeEditorResult (props) {
+const CodeEditorResult = ({ tabIndex, dispatch, tabIndexChange, editor, stdin, onStdinChange, ...rest }) => {
   const classes = useStyles()
-  const [value, setValue] = React.useState(0)
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue)
-  }
 
   return (
-    <Collapse {...props}>
+    <Collapse {...rest}>
       <div className={classes.root}>
         <AppBar position='static'>
-          <AntTabs variant='standard' value={value} onChange={handleChange} aria-label='simple tabs example'>
-            <AntTab label='Testcase' {...a11yProps(0)} />
+          <AntTabs variant='standard' value={tabIndex} onChange={tabIndexChange} aria-label='simple tabs example'>
+            <AntTab label='Stdin' {...a11yProps(0)} />
             <AntTab label='Run Code Result' {...a11yProps(1)} />
           </AntTabs>
         </AppBar>
-        <TabPanel value={value} index={0}>
+        <TabPanel value={tabIndex} index={0}>
           <AceEditor
             placeholder='Placeholder Text'
             mode='markdown'
@@ -143,16 +140,13 @@ export default function CodeEditorResult (props) {
             height='15rem'
             className={classes.editor}
             // onLoad={this.onLoad}
-            // onChange={this.onChange}
+            onChange={onStdinChange}
             fontSize={16}
             showPrintMargin
             // onFocus={(e) => console.log('hello world')}
             showGutter={false}
             highlightActiveLine={false}
-            value={`
-[2,7,11,15]
-
-9`}
+            value={stdin}
             setOptions={{
               enableBasicAutocompletion: false,
               enableLiveAutocompletion: false,
@@ -162,53 +156,91 @@ export default function CodeEditorResult (props) {
             }}
           />
         </TabPanel>
-        <TabPanel value={value} index={1}>
-          <Grid
-            spacing={2}
-            justify='center'
-            alignItems='center' container
-          >
-            <Grid item xs={12}>
-              <Typography variant='subtitle1' color='error'>Wrong Answer</Typography>
-            </Grid>
-            <Grid
-              item xs={2}
-            >
-              <Typography>Your input</Typography>
+        <TabPanel value={tabIndex} index={1}>
+          {
+            editor.result
+              ? editor.result.stderr
+                ? <Alert severity='error'>{editor.result.stderr}</Alert>
+                : <Grid
+                  spacing={2}
+                  justify='center'
+                  alignItems='center' container
+                >
 
-            </Grid>
-            <Grid item xs={10}>
-              <div className={classes.valueBox}>
-                [2,7,11,15]<br />
-                 9
-              </div>
-            </Grid>
-            <Grid
-              item xs={2}
-            >
-              <Typography>Output</Typography>
+                  {
+                    editor.submitted
+                      ? <Grid item xs={12}>
+                        <Typography variant='subtitle1' style={{ color: editor.result.success ? 'green' : 'red' }}>{editor.result.success
+                          ? <>
+                          Accepted <br />
+                            <Typography variant='caption' color='textSecondary'>all {editor.result.testcaseCount} test cases passed successfully</Typography>
+                            </>
+                          : 'Wrong Answer'}
+                        </Typography>
+                        </Grid>
+                      : null
+                  }
+                  {
+                    !editor.result.success
+                      ? <>
+                        <Grid
+                          item xs={2}
+                        >
+                          <Typography>Your input</Typography>
 
-            </Grid>
-            <Grid item xs={10}>
-              <div className={classes.valueBox}>
-              [0,1]
-              </div>
-            </Grid>
-            <Grid
-              item xs={2}
-            >
-              <Typography>Expected</Typography>
+                        </Grid>
+                        <Grid item xs={10}>
+                          <div className={classes.valueBox}>
+                            {
+                              editor.submitted
+                                ? editor.result.stdin
+                                : stdin
+                            }
+                          </div>
+                        </Grid>
+                        <Grid
+                          item xs={2}
+                        >
+                          <Typography>Output</Typography>
 
-            </Grid>
-            <Grid item xs={10}>
-              <div className={classes.valueBox}>
-              [0,2]
-              </div>
-            </Grid>
-          </Grid>
+                        </Grid>
+                        <Grid item xs={10}>
+                          <div className={classes.valueBox}>
+                            {editor.result.stdout}
+                          </div>
+                        </Grid>
+                        {
+                          editor.submitted
+                            ? <>
+                              <Grid
+                                item xs={2}
+                              >
+                                <Typography>Expected</Typography>
+
+                              </Grid>
+                              <Grid item xs={10}>
+                                <div className={classes.valueBox}>
+                                  {editor.result.expectedStdout}
+                                </div>
+                              </Grid>
+                              </>
+                            : null
+                        }
+
+                        </>
+                      : null
+                  }
+                  </Grid>
+              : <Typography style={{ textAlign: 'center' }} color='textSecondary'>Please run your code first</Typography>
+          }
 
         </TabPanel>
       </div>
     </Collapse>
   )
 }
+
+const mapStateToProps = state => ({
+  editor: state.editor
+})
+export default connect(mapStateToProps)(CodeEditorResult)
