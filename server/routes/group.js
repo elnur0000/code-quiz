@@ -5,7 +5,8 @@ const {
   deleteGroup,
   addUser,
   deleteUser,
-  editUser
+  editUser,
+  editGroup
 } = require('../controllers/group-controller')
 const { protectedRoute } = require('../middleware/auth')
 const { validator } = require('../middleware/validator')
@@ -22,6 +23,7 @@ router
 router
   .route('/:id')
   .delete(deleteGroup)
+  .put(validator('Group'), editGroup)
 
 router
   .route('/:id/users')

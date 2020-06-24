@@ -1,31 +1,13 @@
 import React from 'react'
 import {
   Dialog,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-  Button,
   List,
   ListItem,
   ListItemText,
-  Divider,
-  Card,
-  CardContent,
   makeStyles,
-  Paper,
-  Grid,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  ListItemIcon,
-  CardActions,
-  CardHeader,
-  DialogTitle,
-  ListSubheader,
-  Avatar,
-  ListItemAvatar
+  ListSubheader
 } from '@material-ui/core'
+import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
 
@@ -41,24 +23,33 @@ const useStyles = makeStyles((theme) => ({
   }
 
 }))
-const emails = ['SQL sample test', 'SQL sample test', 'SQL sample test']
 
-const TestReportsDialog = props => {
-  const classes = useStyles()
-
+const TestReportsDialog = ({ submittedProblems, ...rest }) => {
   return (
-    <Dialog {...props}>
+    <Dialog {...rest}>
       <List subheader={
         <ListSubheader component='div' id='nested-list-subheader'>
           Submitted Problems
         </ListSubheader>
       }
       >
-        {emails.map((email) => (
-          <ListItem button key={email}>
-            <ListItemText primary={email} secondary='1/10' />
+        {submittedProblems.length ? submittedProblems.map((submittedProblem) => (
+          <ListItem
+            key={submittedProblem._id}
+            component={Link}
+            to={{
+              pathname: `/problem/${submittedProblem.problem._id}`,
+              state: {
+                code: submittedProblem.code
+              }
+            }}
+          >
+            <ListItemText primary={submittedProblem.problem.name} secondary='click for the code' />
           </ListItem>
-        ))}
+        ))
+          : <ListItem button>
+            <ListItemText primary="candidate haven't submitted a problem" />
+          </ListItem>}
 
       </List>
     </Dialog>

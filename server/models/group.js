@@ -7,6 +7,7 @@ const GroupSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, 'Please add a name'],
+      unique: true,
       maxlength: 50
     },
     users: [
@@ -14,7 +15,6 @@ const GroupSchema = new mongoose.Schema(
         email: {
           type: String,
           required: [true, 'Please add an email to user'],
-          unique: true,
           match: [
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
             'Please add a valid email'

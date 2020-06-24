@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
+import WebSocketProvider, { WebSocketContext } from '../../contexts/Websocket'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -14,12 +15,12 @@ import 'ace-builds/src-noconflict/mode-java'
 import 'ace-builds/src-noconflict/mode-python'
 import 'ace-builds/src-noconflict/mode-c_cpp'
 import 'ace-builds/src-noconflict/mode-javascript'
-import ProblemDescription from './ProblemDescription'
+import ProblemDescription from '../problem/ProblemDescription'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { getProblem } from '../../actions/problem'
+import { getTestByAccessToken } from '../../actions/test'
 import Spinner from '../layout/Spinner'
-import { runCode, submitProblem } from '../../actions/editor'
+import { runCode, submitTest } from '../../actions/editor'
 const drawerWidth = '42.5%'
 
 const useStyles = makeStyles((theme) => ({
@@ -98,15 +99,31 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const Problem = ({ runCode, match, getProblem, submitProblem, problem, location }) => {
+const Test = ({ runCode, match, getTestByAccessToken, submitTest, test, ...rest }) => {
   const classes = useStyles()
+  const ws = useContext(WebSocketContext)
+
+  const onBlur = (e) => {
+    ws.socket.emit('event://blur', `Left the test at ${new Date()}`)
+  }
+  const onFocus = (e) => {
+    ws.socket.emit('event://focus', `Returned back to the test at ${new Date()}`)
+  }
 
   useEffect(() => {
-    getProblem(match.params.id)
+    localStorage.setItem('accessToken', match.params.id)
+    getTestByAccessToken(match.params.id)
+    window.addEventListener('blur', onBlur)
+    window.addEventListener('focus', onFocus)
+    return () => {
+      window.removeEventListener('blur', onBlur)
+      window.removeEventListener('focus', onFocus)
+    }
   }, [])
 
+  const [activeStep, setActiveStep] = React.useState(0)
   const [open, setOpen] = useState(true)
-  const [code, setCode] = useState(location.state ? location.state.code : '')
+  const [code, setCode] = useState('')
 
   function handleCodeChange (newValue) {
     setCode(newValue)
@@ -125,15 +142,15 @@ const Problem = ({ runCode, match, getProblem, submitProblem, problem, location 
   }
 
   const handleSubmitCode = (language) => {
-    submitProblem(match.params.id, code, language)
+    submitTest(test.problems[activeStep]._id, code, language, match.params.id)
   }
 
-  if (!problem) {
+  if (!test) {
     return <Spinner />
   }
   return (
     <div className={classes.root}>
-      <ProblemDescription problem={problem} handleDrawerClose={handleDrawerClose} open={open} />
+      <ProblemDescription setActiveStep={setActiveStep} maxSteps={test.problems.length} problem={test.problems[activeStep]} activeStep={activeStep} handleDrawerClose={handleDrawerClose} open={open} />
 
       <main
         className={clsx(classes.content, {
@@ -148,17 +165,17 @@ const Problem = ({ runCode, match, getProblem, submitProblem, problem, location 
   )
 }
 
-Problem.propTypes = {
+Test.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.shape({
       id: PropTypes.string.isRequired
     })
   }),
-  getProblem: PropTypes.func.isRequired
+  getTestByAccessToken: PropTypes.func.isRequired
 }
 
 const mapStateToProps = state => ({
-  problem: state.problem.problem
+  test: state.test.test
 })
 
-export default connect(mapStateToProps, { getProblem, runCode, submitProblem })(Problem)
+export default connect(mapStateToProps, { getTestByAccessToken, runCode, submitTest })(Test)

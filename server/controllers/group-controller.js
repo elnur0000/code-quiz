@@ -21,9 +21,24 @@ exports.getGroups = asyncWrapper(async (req, res, next) => {
     createdBy: req.user._id
   })
     .skip(offset || 0)
-    .limit(limit || Infinity)
+    .limit(limit || 0)
     .exec()
   res.send(groups)
+})
+
+// @desc      Edit groups
+// @route     PUT /api/v1/groups/:id
+// @access    Private
+exports.editGroup = asyncWrapper(async (req, res, next) => {
+  const _id = req.params.id
+  const group = await Group.findOneAndUpdate({
+    _id,
+    createdBy: req.user._id
+  }, req.body, { new: true }).exec()
+
+  if (!group) throw new NotFoundError('group not found')
+
+  res.send(group)
 })
 
 // @desc      delete a group

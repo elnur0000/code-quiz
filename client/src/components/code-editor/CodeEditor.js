@@ -86,7 +86,7 @@ const CodeEditor = ({ handleSubmitCode, handleRunCode, code, onChange, handleDra
       <AceEditor
         // className={classes.editor}
         style={{ width: '100%', height: `calc(100vh - ${4.5 + (resultIsOpen ? 20.5 : 0)}rem)`, minWidth: 600 }}
-        mode={language === 'c' || language === 'cpp' ? 'c_cpp' : language}
+        mode={language === 'c' || language === 'cpp' ? 'c_cpp' : language === 'node' ? 'javascript' : language}
         value={code}
         theme={theme}
         height='100%'

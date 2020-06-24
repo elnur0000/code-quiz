@@ -22,7 +22,6 @@ exports.runCode = (language, stdin, code) => {
 exports.runCodeAgainstTestcase = async (language, stdin, code, expectedStdout) => {
   const result = await this.runCode(language, stdin, code)
   if (result.sterr) return result
-  console.log(result.stdout, expectedStdout)
   return {
     passed: result.stdout.trim() === expectedStdout.trim(),
     stdin,

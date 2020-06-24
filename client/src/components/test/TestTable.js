@@ -10,22 +10,8 @@ import {
   CardContent,
   Table,
   TableBody,
-  TableCell,
-  TableRow,
-  Typography,
-  TablePagination,
-  Tooltip,
-  IconButton,
-  Grid,
-  Button
+  TablePagination
 } from '@material-ui/core'
-
-import {
-  GroupAddTwoTone as GroupAddIcon,
-  AssignmentTwoTone as Assignment,
-  Delete as DeleteIcon
-}
-  from '@material-ui/icons'
 
 import TestRow from './TestRow'
 
@@ -47,9 +33,8 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const TestTable = props => {
-  const { className, users, ...rest } = props
-
+const TestTable = ({ className, tests, ...rest }) => {
+  console.log(tests)
   const classes = useStyles()
 
   const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -73,8 +58,8 @@ const TestTable = props => {
         <div className={classes.inner}>
           <Table>
             <TableBody>
-              {users.slice(0, rowsPerPage).map(user => (
-                <TestRow key={user.id} row={user} />
+              {tests.slice(0, rowsPerPage).map(test => (
+                <TestRow key={test._id} test={test} />
               ))}
             </TableBody>
           </Table>
@@ -83,7 +68,7 @@ const TestTable = props => {
       <CardActions className={classes.actions}>
         <TablePagination
           component='div'
-          count={users.length}
+          count={tests.length}
           onChangePage={handlePageChange}
           onChangeRowsPerPage={handleRowsPerPageChange}
           page={page}
@@ -97,7 +82,7 @@ const TestTable = props => {
 
 TestTable.propTypes = {
   className: PropTypes.string,
-  users: PropTypes.array.isRequired
+  tests: PropTypes.array.isRequired
 }
 
 export default TestTable

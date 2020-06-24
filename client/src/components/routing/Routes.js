@@ -10,15 +10,18 @@ import TestList from '../test/TestList'
 import ProblemList from '../problem/ProblemList'
 import GroupList from '../group/GroupList'
 import Problem from '../problem/Problem'
+import Test from '../test/Test'
+import WebSocketProvider, { WebSocketContext } from '../../contexts/Websocket'
 
 const Routes = () => {
   return (
-    <div>
+    <WebSocketProvider>
       <Switch>
         <Route exact path='/register' component={Register} />
         <Route exact path='/login' component={Login} />
         <Route exact path='/forgot-password' component={ForgotPassword} />
         <Route exact path='/reset-password/:token' component={ResetPassword} />
+        <Route exact path='/test/:id' component={Test} />
         <PrivateRoute
           component={Problem}
           exact
@@ -44,7 +47,7 @@ const Routes = () => {
         />
         <Redirect to='/' />
       </Switch>
-    </div>
+    </WebSocketProvider>
   )
 }
 

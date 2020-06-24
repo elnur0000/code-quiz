@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-const ProblemDescription = ({ open, handleDrawerClose, problem }) => {
+const ProblemDescription = ({ open, setActiveStep, handleDrawerClose, problem, maxSteps, activeStep }) => {
   const classes = useStyles()
   const theme = useTheme()
   return (
@@ -134,7 +134,12 @@ const ProblemDescription = ({ open, handleDrawerClose, problem }) => {
       />
 
       {/* </div> */}
-      <ProblemDescriptionFooter />
+      {
+        maxSteps
+          ? <ProblemDescriptionFooter setActiveStep={setActiveStep} maxSteps={maxSteps} activeStep={activeStep} />
+          : null
+      }
+
     </Drawer>
   )
 }

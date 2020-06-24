@@ -8,6 +8,8 @@ const config = require('../config')
 const app = require('../app')
 const http = require('http')
 
+const socketService = require('../services/websocket')
+
 /**
  * Get port from environment and store in Express.
  */
@@ -20,6 +22,11 @@ app.set('port', port)
  */
 
 const server = http.createServer(app)
+
+// init socket.io and add it to app object
+const io = require('socket.io')(server)
+app.set('io', io)
+socketService(io)
 
 server.listen(port)
 server.on('error', onError)

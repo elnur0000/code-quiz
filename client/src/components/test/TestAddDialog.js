@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   Dialog,
   AppBar,
@@ -8,12 +8,10 @@ import {
   Button,
   List,
   ListItem,
-  ListItemText,
   Divider,
   Card,
   CardContent,
   makeStyles,
-  Paper,
   Grid,
   TextField,
   FormControlLabel,
@@ -25,6 +23,10 @@ import {
 import {
   Close as CloseIcon
 } from '@material-ui/icons'
+import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
+
+import { getProblems } from '../../actions/problem'
 
 const useStyles = makeStyles((theme) => ({
 
@@ -76,22 +78,34 @@ function union (a, b) {
   return [...a, ...not(b, a)]
 }
 
-const TestAddDialog = props => {
+const TestAddDialog = ({ problems, getProblems, ...rest }) => {
   const classes = useStyles()
-  const [state, setState] = React.useState({
-    checkedA: true,
-    checkedB: true,
-    checkedF: true,
-    checkedG: true
+
+  useEffect(() => {
+    getProblems()
+  }, [getProblems])
+
+  useEffect(() => {
+    setLeft(problems)
+  }, [problems])
+
+  const [allowedLanguages, setAllowedLanguages] = React.useState({
+    nodejs: true,
+    c: true,
+    java: true,
+    cpp: true,
+    python: true
   })
 
+  const [name, setName] = React.useState('')
+
   const handleChange = (event) => {
-    setState({ ...state, [event.target.name]: event.target.checked })
+    setAllowedLanguages({ ...allowedLanguages, [event.target.name]: event.target.checked })
   }
 
   const [checked, setChecked] = React.useState([])
-  const [left, setLeft] = React.useState([0, 1, 2, 3])
-  const [right, setRight] = React.useState([4, 5, 6, 7])
+  const [left, setLeft] = React.useState([])
+  const [right, setRight] = React.useState([])
 
   const leftChecked = intersection(checked, left)
   const rightChecked = intersection(checked, right)
@@ -157,10 +171,10 @@ const TestAddDialog = props => {
               <Card className={classes.problemCard}>
                 <CardContent>
                   <Grid container spacing={2}>
-                    <Grid item xs={12}><Typography variant='subtitle1' className={classes.problemCardHeader}>Square Problem</Typography></Grid>
-                    <Grid item xs={12}><Typography variant='subtitle2'>Description :</Typography><Typography>Print square of inputted integer</Typography></Grid>
-                    <Grid item xs={12}><Typography variant='subtitle2'>Recommended Time for Problem :</Typography><Typography>15 minutes</Typography></Grid>
-                    <Grid item xs={12}><Typography variant='subtitle2'>Difficulty :</Typography><Typography>Easy</Typography></Grid>
+                    <Grid item xs={12}><Typography variant='subtitle1' className={classes.problemCardHeader}>{value.name}</Typography></Grid>
+                    <Grid item xs={12}><Typography variant='subtitle2'>Description :</Typography><Typography>{value.description}</Typography></Grid>
+                    <Grid item xs={12}><Typography variant='subtitle2'>Recommended Time for Problem :</Typography><Typography>~ minutes</Typography></Grid>
+                    <Grid item xs={12}><Typography variant='subtitle2'>Difficulty :</Typography><Typography>{value.description}</Typography></Grid>
                   </Grid>
                 </CardContent>
                 <CardActions>
@@ -183,7 +197,7 @@ const TestAddDialog = props => {
     </Card>
   )
   return (
-    <Dialog {...props}>
+    <Dialog {...rest}>
       <Grid
         container
         direction='row'
@@ -195,13 +209,13 @@ const TestAddDialog = props => {
         <Grid item xs={12}>
           <AppBar position='fixed' color='primary'>
             <Toolbar>
-              <IconButton edge='start' color='inherit' onClick={props.onClose} aria-label='close'>
+              <IconButton edge='start' color='inherit' onClick={rest.onClose} aria-label='close'>
                 <CloseIcon />
               </IconButton>
               <Typography variant='body1' className={classes.title}>
          Create a New Test
               </Typography>
-              <Button autoFocus variant='outlined' color='secondary' onClick={props.onClose}>
+              <Button disabled={!name || !Object.values(allowedLanguages).includes(true) || !right.length} autoFocus variant='outlined' color='secondary' onClick={() => rest.onSubmit({ allowedLanguages, name, problems: right })}>
          Add
               </Button>
             </Toolbar>
@@ -215,6 +229,8 @@ const TestAddDialog = props => {
                 name='name'
                 variant='outlined'
                 required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 fullWidth
                 id='name'
                 label='Test Name'
@@ -228,20 +244,24 @@ const TestAddDialog = props => {
                   <Typography>Select the Programming Language:</Typography>
                 </Grid>
                 <FormControlLabel
-                  control={<Checkbox checked={state.checkedA} onChange={handleChange} name='checkedA' />}
-                  label='Secondary'
+                  control={<Checkbox checked={allowedLanguages.nodejs} onChange={handleChange} name='nodejs' />}
+                  label='Node.js'
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={state.checkedA} onChange={handleChange} name='checkedA' />}
-                  label='Secondary'
+                  control={<Checkbox checked={allowedLanguages.c} onChange={handleChange} name='c' />}
+                  label='C'
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={state.checkedA} onChange={handleChange} name='checkedA' />}
-                  label='Secondary'
+                  control={<Checkbox checked={allowedLanguages.java} onChange={handleChange} name='java' />}
+                  label='Java'
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={state.checkedA} onChange={handleChange} name='checkedA' />}
-                  label='Secondary'
+                  control={<Checkbox checked={allowedLanguages.cpp} onChange={handleChange} name='cpp' />}
+                  label='C++'
+                />
+                <FormControlLabel
+                  control={<Checkbox checked={allowedLanguages.python} onChange={handleChange} name='python' />}
+                  label='Python'
                 />
               </Grid>
             </Grid>
@@ -282,4 +302,12 @@ const TestAddDialog = props => {
   )
 }
 
-export default TestAddDialog
+TestAddDialog.propTypes = {
+  getProblems: PropTypes.func.isRequired,
+  problems: PropTypes.array.isRequired
+}
+const mapStateToProps = state => ({
+  problems: state.problem.problems
+})
+
+export default connect(mapStateToProps, { getProblems })(TestAddDialog)

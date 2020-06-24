@@ -19,6 +19,7 @@ function normalizePort (val) {
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
 module.exports = {
+  authSecret: process.env.JWT_SECRET,
   mongoUri: process.env.MONGO_URI,
   port: normalizePort(process.env.PORT || 5000)
 }

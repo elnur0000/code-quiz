@@ -1,30 +1,11 @@
 import React from 'react'
 import {
   Dialog,
-  AppBar,
-  Toolbar,
-  IconButton,
   Typography,
-  Button,
   List,
   ListItem,
   ListItemText,
-  Divider,
-  Card,
-  CardContent,
-  makeStyles,
-  Paper,
-  Grid,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  ListItemIcon,
-  CardActions,
-  CardHeader,
-  DialogTitle,
-  ListSubheader,
-  Avatar,
-  ListItemAvatar
+  makeStyles
 } from '@material-ui/core'
 
 const useStyles = makeStyles((theme) => ({
@@ -40,31 +21,38 @@ const useStyles = makeStyles((theme) => ({
     flexBasis: '100%'
   },
   list: {
-    height: '20rem'
+    height: '30rem'
   }
 
 }))
-const emails = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-const TestReportsDialog = props => {
+const TestReportsDialog = ({ reports, ...rest }) => {
   const classes = useStyles()
 
   return (
-    <Dialog {...props}>
+    <Dialog {...rest}>
       <List
         className={classes.list}
       >
-        {emails.map((email) => (
-          <ListItem button key={email}>
+        {reports.length ? reports.map((report) => (
+          <ListItem button key={report}>
             <ListItemText primary={
               <>
-                <Typography variant='subtitle2' color='secondary'>[10/May/2020:01:13:15 +0000]</Typography>
-                <Typography>switched to another window, oh snap</Typography>
+                <Typography variant='subtitle2' color='secondary'>{report.slice(report.indexOf('at'))}</Typography>
+                <Typography>{report.slice(0, report.indexOf('at'))}</Typography>
               </>
             }
             />
           </ListItem>
-        ))}
+        ))
+          : <ListItem button>
+            <ListItemText primary={
+              <>
+                <Typography>No reports found for this candidate</Typography>
+              </>
+            }
+            />
+          </ListItem>}
 
       </List>
     </Dialog>

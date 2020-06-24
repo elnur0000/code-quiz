@@ -1,7 +1,7 @@
 import React from 'react'
 import { withStyles } from '@material-ui/core/styles'
 import Button from '@material-ui/core/Button'
-import { FormControl, MenuItem, Select, InputLabel, Grid } from '@material-ui/core'
+import { FormControl, MenuItem, Select, Grid } from '@material-ui/core'
 import Dialog from '@material-ui/core/Dialog'
 import MuiDialogTitle from '@material-ui/core/DialogTitle'
 import MuiDialogContent from '@material-ui/core/DialogContent'

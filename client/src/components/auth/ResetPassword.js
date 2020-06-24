@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match, loading }) => {
   const classes = useStyles()
+  const history = useHistory()
   const [formData, setFormData] = useState({
     password: '',
     password2: '',
@@ -72,7 +73,7 @@ const ResetPassword = ({ setAlert, changePassword, isAuthenticated, match, loadi
   const onSubmit = async e => {
     e.preventDefault()
     changePassword(password, match.params.token)
-    // useHistory().push('/login')
+    history.push('/login')
   }
 
   if (isAuthenticated) {

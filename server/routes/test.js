@@ -5,7 +5,9 @@ const {
   editTest,
   deleteTest,
   invite,
-  runCode
+  runCode,
+  getTest,
+  submitCode
 } = require('../controllers/test-controller')
 const { protectedRoute } = require('../middleware/auth')
 const { validator } = require('../middleware/validator')
@@ -14,6 +16,12 @@ const router = express.Router()
 
 router
   .post('/run', validator('Test', 'runCode'), runCode)
+
+router
+  .get('/:accessToken', getTest)
+
+router
+  .post('/submit', submitCode)
 
 router.use(protectedRoute)
 

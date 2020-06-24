@@ -1,8 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import { makeStyles } from '@material-ui/styles'
+import { connect } from 'react-redux'
+import PropTypes from 'prop-types'
 
 import GroupTable from './GroupTable'
-import mockData from './data'
+import Alert from '../layout/Alert'
+import { getGroups } from '../../actions/group'
+import GroupToolbar from './GroupToolbar'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -13,18 +17,29 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const GroupList = () => {
+const GroupList = ({ getGroups, groups }) => {
   const classes = useStyles()
 
-  const [groups] = useState(mockData)
+  useEffect(() => {
+    getGroups()
+  }, [getGroups])
 
   return (
     <div className={classes.root}>
+      <Alert />
+      <GroupToolbar />
       <div className={classes.content}>
         <GroupTable groups={groups} />
       </div>
     </div>
   )
 }
+GroupList.propTypes = {
+  getGroups: PropTypes.func.isRequired,
+  groups: PropTypes.array.isRequired
+}
+const mapStateToProps = state => ({
+  groups: state.group.groups
+})
 
-export default GroupList
+export default connect(mapStateToProps, { getGroups })(GroupList)

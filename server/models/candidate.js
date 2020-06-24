@@ -10,6 +10,14 @@ const CandidateSchema = new mongoose.Schema(
       required: [true, 'Please add a name'],
       maxlength: 100
     },
+    email: {
+      type: String,
+      required: [true, 'Please add an email'],
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        'Please add a valid email'
+      ]
+    },
     reports: [String],
     assignedTest: {
       type: ObjectId,
@@ -48,7 +56,7 @@ const CandidateSchema = new mongoose.Schema(
 )
 
 CandidateSchema.methods.addSubmittedProblem = function (doc) {
-  const submittedProblemIndex = this.submittedProblems.findIndex(submittedProblem => submittedProblem._id.toString() === doc.problem)
+  const submittedProblemIndex = this.submittedProblems.findIndex(submittedProblem => submittedProblem.problem.toString() === doc.problem)
   if (submittedProblemIndex === -1) return this.submittedProblems.push(doc)
 
   for (const key in doc) {
@@ -56,7 +64,7 @@ CandidateSchema.methods.addSubmittedProblem = function (doc) {
   }
 }
 
-CandidateSchema.methods.setAccessToken = async function () {
+CandidateSchema.methods.setAccessToken = function () {
   const accessToken = crypto.randomBytes(20).toString('hex')
 
   this.accessToken = crypto

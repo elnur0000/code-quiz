@@ -22,9 +22,13 @@ import {
   Delete as DeleteIcon
 } from '@material-ui/icons'
 
+import PeopleAltIcon from '@material-ui/icons/PeopleAlt'
+
 import TestInviteDialog from './TestInviteDialog'
 import ConfirmationDialog from '../shared-dialogs/ConfirmationDialog'
 import Transition from '../Transition'
+import { connect } from 'react-redux'
+import { deleteTest, inviteCandidate } from '../../actions/test'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -57,7 +61,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-function GroupRow ({ row }) {
+function GroupRow ({ test, deleteTest, inviteCandidate, reports }) {
   const classes = useStyles()
   const [open, setOpen] = useState(false)
 
@@ -65,13 +69,12 @@ function GroupRow ({ row }) {
     columns: [
       { title: 'Name', field: 'name' },
       { title: 'Email', field: 'email' }
-    ],
-    users: [
-      { name: 'Name', email: 'name@mail.com' },
-      { name: 'Name', email: 'name@mail.com' }
     ]
   })
 
+  const [candidate, setCandidate] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [isLiveReports, setIsLiveReports] = useState(false)
   const [inviteDialogIsOpen, setInviteDialogOpen] = useState(false)
   const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false)
 
@@ -96,7 +99,8 @@ function GroupRow ({ row }) {
     setReportsDialogIsOpen(false)
   }
 
-  const handleReportsDialogOpen = () => {
+  const handleReportsDialogOpen = (candidate) => {
+    setCandidate(candidate)
     setReportsDialogIsOpen(true)
   }
 
@@ -106,8 +110,21 @@ function GroupRow ({ row }) {
     setProblemsDialogIsOpen(false)
   }
 
-  const handleProblemsDialogOpen = () => {
+  const onDeleteConfirmation = () => {
+    deleteTest(test._id)
+    setConfirmationDialogIsOpen(false)
+  }
+
+  const handleProblemsDialogOpen = (candidate) => {
+    setCandidate(candidate)
     setProblemsDialogIsOpen(true)
+  }
+
+  const handleInvitation = async candidate => {
+    setLoading(true)
+    await inviteCandidate(test._id, candidate)
+    setLoading(false)
+    setInviteDialogOpen(false)
   }
 
   return (
@@ -116,22 +133,30 @@ function GroupRow ({ row }) {
         open={inviteDialogIsOpen}
         onClose={handleInviteDialogClose}
         aria-labelledby='form-dialog-title'
+        loading={loading}
+        onSubmit={handleInvitation}
       />
       <ConfirmationDialog
         open={confirmationDialogIsOpen}
         onClose={handleConfirmationDialogClose}
         message='You are about to delete this test'
+        onConfirmation={onDeleteConfirmation}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
       />
       <TestProblemsDialog
         onClose={handleProblemsDialogClose} aria-labelledby='simple-dialog-title'
         open={problemsDialogIsOpen}
+        submittedProblems={candidate.submittedProblems || []}
         TransitionComponent={Transition}
       />
       <TestReportsDialog
-        onClose={handleReportsDialogClose} aria-labelledby='simple-dialog-title'
+        onClose={() => {
+          setIsLiveReports(false)
+          handleReportsDialogClose()
+        }} aria-labelledby='simple-dialog-title'
         open={reportsDialogIsOpen}
+        reports={isLiveReports ? (test.reports || []) : candidate.reports || []}
         TransitionComponent={Transition}
       />
       <TableRow
@@ -154,27 +179,48 @@ function GroupRow ({ row }) {
               direction='column'
               className={classes.nameContainer}
             >
-              <Typography variant='body1'>SQL sample test</Typography>
-              <Typography variant='body2' color='secondary'>Duration: 50 minutes , No. of problems: 3</Typography>
+              <Typography variant='body1'>{test.name}</Typography>
+              <Typography variant='body2' color='secondary'>No. of problems: {test.problems.length}</Typography>
             </Grid>
-            <Tooltip title='View Reports'>
-              <IconButton onClick={() => setOpen(!open)} aria-label='report'>
-                <Assignment fontSize='large' />
-              </IconButton>
-            </Tooltip>
-            <Typography variant='body1'>Reports</Typography>
-            <div className={classes.divider} />
+            <Grid>
+              <Tooltip title='View Invited Candidates'>
+                <IconButton onClick={() => setOpen(!open)} aria-label='candidate'>
+                  <PeopleAltIcon fontSize='large' />
+                </IconButton>
+              </Tooltip>
+
+            </Grid>
+            <Grid />
+            {/* <div className={classes.divider} /> */}
           </Grid>
 
         </TableCell>
-
         <TableCell>
           <Grid
             container
             direction='row'
             alignItems='center'
           >
-            <span className={classes.circle}>2</span>
+            <Tooltip title='Live Reports'>
+              <IconButton
+                onClick={() => {
+                  setIsLiveReports(true)
+                  setReportsDialogIsOpen(true)
+                }} aria-label='report'
+              >
+                <Assignment fontSize='large' />
+              </IconButton>
+            </Tooltip>
+          </Grid>
+        </TableCell>
+        <TableCell>
+
+          <Grid
+            container
+            direction='row'
+            alignItems='center'
+          >
+            <span className={classes.circle}>{test.completed}</span>
             <Typography variant='body1'>Completed</Typography>
           </Grid>
         </TableCell>
@@ -184,7 +230,7 @@ function GroupRow ({ row }) {
             direction='row'
             alignItems='center'
           >
-            <span className={classes.circle}>2</span>
+            <span className={classes.circle}>{test.incomplete}</span>
             <Typography variant='body1'>Incomplete</Typography>
           </Grid>
         </TableCell>
@@ -194,7 +240,7 @@ function GroupRow ({ row }) {
             direction='row'
             alignItems='center'
           >
-            <span className={classes.circle}>2</span>
+            <span className={classes.circle}>{test.invited}</span>
             <Typography variant='body1'>Invited</Typography>
           </Grid>
         </TableCell>
@@ -212,20 +258,20 @@ function GroupRow ({ row }) {
               <MaterialTable
                 title='Candidates'
                 columns={state.columns}
-                data={state.users}
+                data={test.candidates}
                 actions={[
                   {
                     icon: 'category',
                     tooltip: 'Open The Report List',
                     onClick: (event, rowData) => {
-                      handleProblemsDialogOpen()
+                      handleProblemsDialogOpen(rowData)
                     }
                   },
                   {
-                    icon: 'receipt',
+                    icon: 'assignment',
                     tooltip: 'Open The Report List',
                     onClick: (event, rowData) => {
-                      handleReportsDialogOpen()
+                      handleReportsDialogOpen(rowData)
                     }
                   }
                 ]}
@@ -238,4 +284,4 @@ function GroupRow ({ row }) {
   )
 }
 
-export default GroupRow
+export default connect(null, { deleteTest, inviteCandidate })(GroupRow)

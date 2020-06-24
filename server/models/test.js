@@ -26,6 +26,12 @@ const TestSchema = new mongoose.Schema(
         ref: 'Problem'
       }
     ],
+    candidates: [
+      {
+        type: ObjectId,
+        ref: 'Candidate'
+      }
+    ],
     invited: {
       type: Number,
       default: 0
@@ -44,26 +50,30 @@ const TestSchema = new mongoose.Schema(
   }
 )
 
+TestSchema.methods.addCandidate = function (candidateId) {
+  if (this.candidates.indexOf(candidateId) === -1) {
+    this.candidates.push(candidateId)
+  }
+}
+
 module.exports = {
   Test: mongoose.model('Test', TestSchema),
   TestValidationSchema: Joi.object().keys({
     name: Joi.string().max(100).required(),
-    allowedLanguages: Joi.string().valid(['Node.js', 'Java', 'C', 'C++', 'Python']).required(),
+    allowedLanguages: Joi.array().items(Joi.string().valid(['Node.js', 'Java', 'C', 'C++', 'Python'])).required(),
     problems: Joi.array().items(Joi.string()).required()
   }),
   TestEditValidationSchema: Joi.object().keys({
     name: Joi.string().max(100).required(),
-    allowedLanguages: Joi.string().valid(['Node.js', 'Java', 'C', 'C++', 'Python']).required(),
+    allowedLanguages: Joi.array().items(Joi.string().valid(['Node.js', 'Java', 'C', 'C++', 'Python'])).required(),
     problems: Joi.array().items(Joi.string()).required()
   }).min(1),
   TestInviteValidationSchema: Joi.object().keys({
     validFrom: Joi.date().required(),
     expiresAt: Joi.date().required(),
-    groupId: Joi.string()
-      .when('name', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() })
-      .when('email', { is: Joi.exist(), then: Joi.optional(), otherwise: Joi.required() }),
-    name: Joi.string(),
-    email: Joi.string().email()
+    groupId: Joi.string().allow('').optional(),
+    name: Joi.string().when('groupId', { is: Joi.exist(), then: Joi.allow('').optional(), otherwise: Joi.required() }),
+    email: Joi.string().email().when('groupId', { is: Joi.exist(), then: Joi.allow('').optional(), otherwise: Joi.required() })
   }),
   TestRunCodeValidationSchema: Joi.object().keys({
     language: Joi.string().valid(['python', 'cpp', 'c', 'node', 'java']).required(),

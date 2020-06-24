@@ -10,27 +10,8 @@ import {
   CardContent,
   Table,
   TableBody,
-  TableCell,
-  TableRow,
-  Typography,
-  TablePagination,
-  Tooltip,
-  IconButton,
-  Grid,
-  Collapse,
-  Box,
-  Button,
-  TableHead
+  TablePagination
 } from '@material-ui/core'
-
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  PlayArrow as PlayIcon,
-  KeyboardArrowDown as KeyboardArrowDownIcon,
-  KeyboardArrowUp as KeyboardArrowUpIcon
-}
-  from '@material-ui/icons'
 
 import GroupRow from './GroupRow'
 // import { getInitials } from 'helpers'
@@ -78,7 +59,7 @@ const GroupTable = ({ className, groups, ...rest }) => {
           <Table>
             <TableBody>
               {groups.slice(0, rowsPerPage).map(group => (
-                <GroupRow key={group.email} row={group} />
+                <GroupRow key={group._id} group={group} />
               ))}
             </TableBody>
           </Table>
@@ -101,7 +82,7 @@ const GroupTable = ({ className, groups, ...rest }) => {
 
 GroupTable.propTypes = {
   className: PropTypes.string,
-  users: PropTypes.array.isRequired
+  groups: PropTypes.array.isRequired
 }
 
 export default GroupTable

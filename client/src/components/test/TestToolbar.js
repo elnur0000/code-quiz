@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import clsx from 'clsx'
 import { makeStyles } from '@material-ui/styles'
-import { Button, Slide } from '@material-ui/core'
+import { Button } from '@material-ui/core'
 import TestAddDialog from './TestAddDialog'
 import Transition from '../Transition'
+import { addTest } from '../../actions/test'
+import { connect } from 'react-redux'
 
 // import { SearchInput } from 'components'
 
@@ -30,9 +32,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const TestToolbar = props => {
-  const { className, ...rest } = props
-
+const TestToolbar = ({ className, addTest, ...rest }) => {
   const classes = useStyles()
 
   const [addDialogIsOpen, setAddDialogIsOpen] = useState(false)
@@ -43,6 +43,34 @@ const TestToolbar = props => {
 
   const handleAddDialogOpen = () => {
     setAddDialogIsOpen(true)
+  }
+  const handleAddTest = (newTest) => {
+    const allowedLanguages = []
+    for (const key in newTest.allowedLanguages) {
+      if (newTest.allowedLanguages[key]) {
+        switch (key) {
+          case 'nodejs':
+            allowedLanguages.push('Node.js')
+            break
+          case 'c':
+            allowedLanguages.push('C')
+            break
+          case 'java':
+            allowedLanguages.push('Java')
+            break
+          case 'cpp':
+            allowedLanguages.push('C++')
+            break
+          case 'python':
+            allowedLanguages.push('Python')
+            break
+        }
+      }
+    }
+    newTest.allowedLanguages = allowedLanguages
+    newTest.problems = newTest.problems.map(problem => problem._id)
+    addTest(newTest)
+    setAddDialogIsOpen(false)
   }
 
   return (
@@ -55,6 +83,7 @@ const TestToolbar = props => {
         open={addDialogIsOpen}
         onClose={handleAddDialogClose}
         TransitionComponent={Transition}
+        onSubmit={handleAddTest}
       />
       <div className={classes.row}>
         <span className={classes.spacer} />
@@ -65,7 +94,7 @@ const TestToolbar = props => {
           variant='contained'
           onClick={handleAddDialogOpen}
         >
-          Create New Problem
+          Create New Test
         </Button>
       </div>
       <div className={classes.row}>
@@ -79,7 +108,8 @@ const TestToolbar = props => {
 }
 
 TestToolbar.propTypes = {
-  className: PropTypes.string
+  className: PropTypes.string,
+  addTest: PropTypes.func.isRequired
 }
 
-export default TestToolbar
+export default connect(null, { addTest })(TestToolbar)

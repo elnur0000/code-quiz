@@ -1,24 +1,28 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   TableRow,
   TableCell,
   IconButton,
   Collapse,
   Box,
-  Typography,
-  Table,
-  TableHead,
-  TableBody,
-  TextField,
-  TextareaAutosize,
   makeStyles
 } from '@material-ui/core'
 import MaterialTable from 'material-table'
 
+import ConfirmationDialog from '../shared-dialogs/ConfirmationDialog'
 import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
   KeyboardArrowUp as KeyboardArrowUpIcon,
   KeyboardArrowDown as KeyboardArrowDownIcon
-} from '@material-ui/icons'
+}
+  from '@material-ui/icons'
+
+import Transition from '../Transition'
+
+import { addUser, editUser, deleteUser, deleteGroup, editGroup } from '../../actions/group'
+import GroupEditDialog from './GroupAddDialog'
+import { connect } from 'react-redux'
 
 const useStyles = makeStyles({
   root: {
@@ -28,27 +32,77 @@ const useStyles = makeStyles({
   }
 })
 
-function GroupRow ({ row }) {
+function GroupRow ({ group, editGroup, deleteGroup, addUser, editUser, deleteUser }) {
   const [open, setOpen] = React.useState(false)
-  const [state, setState] = React.useState({
-    columns: [
-      { title: 'Name', field: 'name' },
-      { title: 'Email', field: 'email' }
-    ]
-  })
+  const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false)
+
+  const handleConfirmationDialogOpen = group => {
+    setConfirmationDialogIsOpen(true)
+  }
+
+  const onDeleteConfirmation = () => {
+    deleteGroup(group._id)
+    setConfirmationDialogIsOpen(false)
+  }
+
+  const handleConfirmationDialogClose = () => {
+    setConfirmationDialogIsOpen(false)
+  }
+
+  const [editDialogIsOpen, setEditDialogIsOpen] = useState(false)
+
+  const handleEditDialogClose = () => {
+    setEditDialogIsOpen(false)
+  }
+
+  const handleEditDialogOpen = () => {
+    setEditDialogIsOpen(true)
+  }
+
+  const handleEditGroup = (newGroup) => {
+    editGroup(group._id, newGroup)
+    setEditDialogIsOpen(false)
+  }
   const classes = useStyles()
 
   return (
     <>
+      <ConfirmationDialog
+        open={confirmationDialogIsOpen}
+        onClose={handleConfirmationDialogClose}
+        message='You are about to delete this group'
+        onConfirmation={onDeleteConfirmation}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      />
+
+      <GroupEditDialog
+        open={editDialogIsOpen}
+        isEdit
+        group={group}
+        onClose={handleEditDialogClose}
+        onSubmit={handleEditGroup}
+        TransitionComponent={Transition}
+      />
       <TableRow className={classes.root}>
         <TableCell>
           <IconButton aria-label='expand row' size='small' onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component='th' scope='row'>
-          {row.name}
+        <TableCell align='center' component='th' scope='row'>
+          {group.name}
         </TableCell>
+
+        <TableCell align='right'>
+          <IconButton onClick={() => handleEditDialogOpen()} color='secondary' size='small'>
+            <EditIcon />
+          </IconButton>
+          <IconButton onClick={() => handleConfirmationDialogOpen()} color='secondary' style={{ marginLeft: '1rem' }} size='small'>
+            <DeleteIcon />
+          </IconButton>
+        </TableCell>
+
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -56,44 +110,18 @@ function GroupRow ({ row }) {
             <Box margin={1}>
               <MaterialTable
                 title='Candidates'
-                columns={state.columns}
-                data={row.users}
+                columns={[
+                  { title: 'Name', field: 'name' },
+                  { title: 'Email', field: 'email' }
+                ]}
+                data={group.users}
                 editable={{
-                  onRowAdd: (newData) =>
-                    new Promise((resolve) => {
-                      setTimeout(() => {
-                        resolve()
-                        setState((prevState) => {
-                          const data = [...prevState.data]
-                          data.push(newData)
-                          return { ...prevState, data }
-                        })
-                      }, 600)
-                    }),
-                  onRowUpdate: (newData, oldData) =>
-                    new Promise((resolve) => {
-                      setTimeout(() => {
-                        resolve()
-                        if (oldData) {
-                          setState((prevState) => {
-                            const data = [...prevState.data]
-                            data[data.indexOf(oldData)] = newData
-                            return { ...prevState, data }
-                          })
-                        }
-                      }, 600)
-                    }),
-                  onRowDelete: (oldData) =>
-                    new Promise((resolve) => {
-                      setTimeout(() => {
-                        resolve()
-                        setState((prevState) => {
-                          const data = [...prevState.data]
-                          data.splice(data.indexOf(oldData), 1)
-                          return { ...prevState, data }
-                        })
-                      }, 600)
-                    })
+                  onRowAdd: (newData, err) => addUser(group._id, newData),
+                  onRowUpdate: (newData, oldData) => {
+                    const { _id, ...newTestcase } = newData
+                    return editUser(group._id, newTestcase, _id)
+                  },
+                  onRowDelete: (oldData) => deleteUser(group._id, oldData._id)
                 }}
               />
             </Box>
@@ -104,4 +132,4 @@ function GroupRow ({ row }) {
   )
 }
 
-export default GroupRow
+export default connect(null, { addUser, editGroup, deleteGroup, editUser, deleteUser })(GroupRow)
