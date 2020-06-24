@@ -109,7 +109,7 @@ exports.invite = asyncWrapper(async (req, res, next) => {
     const accessToken = candidate.setAccessToken()
     await candidate.save()
     test.addCandidate(candidate._id)
-    const invitationUrl = `http://localhost:3000/test/${accessToken}`
+    const invitationUrl = `${req.baseUrl}/test/${accessToken}`
     try {
       await sendEmail(email, 'Codequiz Test Invitation', testInvitationTemplate(invitationUrl), 'html')
       await test.save()
