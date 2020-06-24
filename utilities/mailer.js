@@ -9,10 +9,10 @@ const nodemailer = require('nodemailer')
 //   }
 // })
 const transporter = nodemailer.createTransport({
-  service: 'FastMail',
+  service: 'gmail',
   auth: {
-    user: process.env.FASTMAIL_USER,
-    pass: process.env.FASTMAIL_PASSWORD
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASSWORD
   }
 })
 
