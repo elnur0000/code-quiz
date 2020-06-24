@@ -86,7 +86,7 @@ const CodeEditorFooter = ({ handleSubmitCode, setTabIndex, code, editor, stdin, 
             <IconButton onClick={handleConsoleToggle} edge='start' color='inherit' aria-label='open drawer'>
               {resultIsOpen ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
             </IconButton>
-          </>
+            </>
           : <LinearProgress style={{ width: '10rem' }} variant='query' color='secondary' />}
 
         <div className={classes.grow} />
@@ -94,12 +94,12 @@ const CodeEditorFooter = ({ handleSubmitCode, setTabIndex, code, editor, stdin, 
           !editor.loading && code
             ? <>
               <Button
-                disabled={editor.loading} onClick={
+                disabled={editor.loading || !stdin} onClick={
                   () => {
                     handleRunCode(language, stdin)
                     setResultIsOpen(true)
                     setTabIndex(1)
-                }
+                  }
                 } style={{ textTransform: 'none' }} edge='end' size='small' variant='contained' className={classes.runButton}
               >
                 <PlayIcon fontSize='small' />
@@ -111,7 +111,7 @@ const CodeEditorFooter = ({ handleSubmitCode, setTabIndex, code, editor, stdin, 
                     handleSubmitCode(language)
                     setResultIsOpen(true)
                     setTabIndex(1)
-                }
+                  }
                 }
                 disabled={editor.loading}
                 style={{ textTransform: 'none' }}
@@ -122,7 +122,7 @@ const CodeEditorFooter = ({ handleSubmitCode, setTabIndex, code, editor, stdin, 
               >
                 <Typography variant='body2'> Submit</Typography>
               </Button>
-              </>
+            </>
             : null
         }
 

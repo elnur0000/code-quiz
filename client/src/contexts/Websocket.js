@@ -14,7 +14,6 @@ var socket
 export default ({ children }) => {
   console.log(children)
   let ws
-  const WS_BASE = 'http://localhost:5000'
   const dispatch = useDispatch()
   // const sendMessage = (roomId, message) => {
   //   const payload = {
@@ -28,7 +27,7 @@ export default ({ children }) => {
     const token = localStorage.getItem('token')
     const accessToken = localStorage.getItem('accessToken')
 
-    socket = io.connect(WS_BASE, {
+    socket = io.connect(window.location.origin, {
       query: { token, accessToken }
     })
 

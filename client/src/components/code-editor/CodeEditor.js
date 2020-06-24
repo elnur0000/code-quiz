@@ -44,9 +44,7 @@ const CodeEditor = ({ handleSubmitCode, handleRunCode, code, onChange, handleDra
   const [tabSize, setTabSize] = useState('4')
   const [resultIsOpen, setResultIsOpen] = useState(false)
   const [tabIndex, setTabIndex] = React.useState(0)
-  const [stdin, setStdin] = useState(
-`[2,7,11,15]
-9`)
+  const [stdin, setStdin] = useState('')
 
   const aceRef = useRef()
 
