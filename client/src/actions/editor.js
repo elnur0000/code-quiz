@@ -20,7 +20,7 @@ export const runCode = (stdin, code, language) => async dispatch => {
   const body = JSON.stringify({ stdin, code, language })
 
   try {
-    const res = await axios.post('/tests/run', body, config)
+    const res = await axios.post('/api/v1/tests/run', body, config)
     dispatch({
       type: EDITOR_RUN,
       payload: res.data
@@ -44,7 +44,7 @@ export const submitProblem = (problemId, code, language) => async dispatch => {
   const body = JSON.stringify({ code, language })
 
   try {
-    const res = await axios.post(`/problems/${problemId}/submit`, body, config)
+    const res = await axios.post(`/api/v1/problems/${problemId}/submit`, body, config)
     dispatch({
       type: EDITOR_SUBMIT,
       payload: res.data
@@ -67,7 +67,7 @@ export const submitTest = (problemId, code, language, accessToken) => async disp
   const body = JSON.stringify({ code, language, problemId })
 
   try {
-    const res = await axios.post(`/tests/submit?accessToken=${accessToken}`, body, config)
+    const res = await axios.post(`/api/v1/tests/submit?accessToken=${accessToken}`, body, config)
     dispatch({
       type: EDITOR_SUBMIT,
       payload: res.data

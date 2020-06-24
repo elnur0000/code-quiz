@@ -13,7 +13,7 @@ import { setAlert } from './alert'
 
 export const getGroups = () => async dispatch => {
   try {
-    const res = await axios.get('/groups')
+    const res = await axios.get('/api/v1/groups')
 
     dispatch({
       type: GET_GROUPS,
@@ -26,7 +26,7 @@ export const getGroups = () => async dispatch => {
 
 export const getGroup = _id => async dispatch => {
   try {
-    const res = await axios.get(`/groups/${_id}`)
+    const res = await axios.get(`/api/v1/groups/${_id}`)
 
     dispatch({
       type: GET_GROUP,
@@ -45,7 +45,7 @@ export const addGroup = group => async dispatch => {
   }
 
   try {
-    const res = await axios.post('/groups', group, config)
+    const res = await axios.post('/api/v1/groups', group, config)
 
     dispatch({
       type: ADD_GROUP,
@@ -60,7 +60,7 @@ export const addGroup = group => async dispatch => {
 
 export const deleteGroup = _id => async dispatch => {
   try {
-    await axios.delete(`/groups/${_id}`)
+    await axios.delete(`/api/v1/groups/${_id}`)
 
     dispatch({
       type: DELETE_GROUP,
@@ -80,7 +80,7 @@ export const editGroup = (_id, group) => async dispatch => {
     }
   }
   try {
-    const res = await axios.put(`/groups/${_id}`, group, config)
+    const res = await axios.put(`/api/v1/groups/${_id}`, group, config)
 
     dispatch({
       type: EDIT_GROUP,
@@ -100,7 +100,7 @@ export const addUser = (groupId, user) => async dispatch => {
     }
   }
   try {
-    const res = await axios.post(`/groups/${groupId}/users`, user, config)
+    const res = await axios.post(`/api/v1/groups/${groupId}/users`, user, config)
 
     dispatch({
       type: GROUP_ADD_USER,
@@ -119,7 +119,7 @@ export const editUser = (groupId, user, userId) => async dispatch => {
     }
   }
   try {
-    const res = await axios.put(`/groups/${groupId}/users/${userId}`, user, config)
+    const res = await axios.put(`/api/v1/groups/${groupId}/users/${userId}`, user, config)
 
     dispatch({
       type: GROUP_EDIT_USER,
@@ -134,7 +134,7 @@ export const editUser = (groupId, user, userId) => async dispatch => {
 
 export const deleteUser = (groupId, userId) => async dispatch => {
   try {
-    const res = await axios.delete(`/groups/${groupId}/users/${userId}`)
+    const res = await axios.delete(`/api/v1/groups/${groupId}/users/${userId}`)
 
     dispatch({
       type: GROUP_DELETE_USER,

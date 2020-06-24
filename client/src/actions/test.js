@@ -10,7 +10,7 @@ import { setAlert } from './alert'
 
 export const getTests = () => async dispatch => {
   try {
-    const res = await axios.get('/tests')
+    const res = await axios.get('/api/v1/tests')
 
     dispatch({
       type: GET_TESTS,
@@ -23,7 +23,7 @@ export const getTests = () => async dispatch => {
 
 export const getTest = _id => async dispatch => {
   try {
-    const res = await axios.get(`/tests/${_id}`)
+    const res = await axios.get(`/api/v1/tests/${_id}`)
 
     dispatch({
       type: GET_TEST,
@@ -36,7 +36,7 @@ export const getTest = _id => async dispatch => {
 
 export const getTestByAccessToken = accessToken => async dispatch => {
   try {
-    const res = await axios.get(`/tests/${accessToken}`)
+    const res = await axios.get(`/api/v1/tests/${accessToken}`)
 
     dispatch({
       type: GET_TEST,
@@ -55,7 +55,7 @@ export const addTest = test => async dispatch => {
   }
 
   try {
-    const res = await axios.post('/tests', test, config)
+    const res = await axios.post('/api/v1/tests', test, config)
 
     dispatch({
       type: ADD_TEST,
@@ -70,7 +70,7 @@ export const addTest = test => async dispatch => {
 
 export const deleteTest = _id => async dispatch => {
   try {
-    await axios.delete(`/tests/${_id}`)
+    await axios.delete(`/api/v1/tests/${_id}`)
 
     dispatch({
       type: DELETE_TEST,
@@ -90,7 +90,7 @@ export const inviteCandidate = (testId, candidate) => async dispatch => {
     }
   }
   try {
-    const res = await axios.post(`/tests/${testId}/invite`, candidate, config)
+    const res = await axios.post(`/api/v1/tests/${testId}/invite`, candidate, config)
 
     dispatch({
       type: TEST_INVITE,

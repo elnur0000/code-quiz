@@ -13,7 +13,7 @@ import { setAlert } from './alert'
 
 export const getProblems = () => async dispatch => {
   try {
-    const res = await axios.get('/problems')
+    const res = await axios.get('/api/v1/problems')
 
     dispatch({
       type: GET_PROBLEMS,
@@ -26,7 +26,7 @@ export const getProblems = () => async dispatch => {
 
 export const getProblem = _id => async dispatch => {
   try {
-    const res = await axios.get(`/problems/${_id}`)
+    const res = await axios.get(`/api/v1/problems/${_id}`)
 
     dispatch({
       type: GET_PROBLEM,
@@ -45,7 +45,7 @@ export const addProblem = problem => async dispatch => {
   }
 
   try {
-    const res = await axios.post('/problems', problem, config)
+    const res = await axios.post('/api/v1/problems', problem, config)
 
     dispatch({
       type: ADD_PROBLEM,
@@ -60,7 +60,7 @@ export const addProblem = problem => async dispatch => {
 
 export const deleteProblem = _id => async dispatch => {
   try {
-    await axios.delete(`/problems/${_id}`)
+    await axios.delete(`/api/v1/problems/${_id}`)
 
     dispatch({
       type: DELETE_PROBLEM,
@@ -80,7 +80,7 @@ export const editProblem = (_id, problem) => async dispatch => {
     }
   }
   try {
-    const res = await axios.put(`/problems/${_id}`, problem, config)
+    const res = await axios.put(`/api/v1/problems/${_id}`, problem, config)
 
     dispatch({
       type: EDIT_PROBLEM,
@@ -100,7 +100,7 @@ export const addTestcase = (problemId, testcase) => async dispatch => {
     }
   }
   try {
-    const res = await axios.post(`/problems/${problemId}/testcases`, testcase, config)
+    const res = await axios.post(`/api/v1/problems/${problemId}/testcases`, testcase, config)
 
     dispatch({
       type: ADD_TESTCASE,
@@ -119,7 +119,7 @@ export const editTestcase = (problemId, testcase, testcaseId) => async dispatch 
     }
   }
   try {
-    const res = await axios.put(`/problems/${problemId}/testcases/${testcaseId}`, testcase, config)
+    const res = await axios.put(`/api/v1/problems/${problemId}/testcases/${testcaseId}`, testcase, config)
 
     dispatch({
       type: EDIT_TESTCASE,
@@ -134,7 +134,7 @@ export const editTestcase = (problemId, testcase, testcaseId) => async dispatch 
 
 export const deleteTestcase = (problemId, testcaseId) => async dispatch => {
   try {
-    const res = await axios.delete(`/problems/${problemId}/testcases/${testcaseId}`)
+    const res = await axios.delete(`/api/v1/problems/${problemId}/testcases/${testcaseId}`)
 
     dispatch({
       type: DELETE_TESTCASE,
