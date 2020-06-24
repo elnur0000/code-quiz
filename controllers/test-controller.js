@@ -109,7 +109,7 @@ exports.invite = asyncWrapper(async (req, res, next) => {
     const accessToken = candidate.setAccessToken()
     await candidate.save()
     test.addCandidate(candidate._id)
-    const invitationUrl = `${req.baseUrl}/test/${accessToken}`
+    const invitationUrl = `${req.protocol + '://' + req.get('host')}/test/${accessToken}`
     try {
       await sendEmail(email, 'Codequiz Test Invitation', testInvitationTemplate(invitationUrl), 'html')
       await test.save()
@@ -133,7 +133,7 @@ exports.invite = asyncWrapper(async (req, res, next) => {
     const accessToken = candidate.setAccessToken()
     await candidate.save()
     test.addCandidate(candidate._id)
-    const invitationUrl = `${req.baseUrl}/test/${accessToken}`
+    const invitationUrl = `${req.protocol + '://' + req.get('host')}/test/${accessToken}`
     await sendEmail(email, 'Codequiz Test Invitation', testInvitationTemplate(invitationUrl), 'html')
   }
   res.send(await test.populate('candidates').execPopulate())
