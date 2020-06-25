@@ -7,15 +7,16 @@ const crypto = require('crypto')
 module.exports = (io) => {
   io.use(function (socket, next) {
     if (socket.handshake.query && (socket.handshake.query.token || socket.handshake.query.accessToken)) {
-      if (socket.handshake.query.token === 'null') {
-        socket.roomId = socket.handshake.query.accessToken
-        return next()
+      if (socket.handshake.query.accessToken) {
+        socket.accessToken = socket.handshake.query.accessToken
       }
-      jwt.verify(socket.handshake.query.token, config.authSecret, function (err, decoded) {
-        if (err) return next(new AuthenticationError())
-        socket.roomId = decoded.id
-        next()
-      })
+      if (socket.handshake.query.token !== 'null') {
+        jwt.verify(socket.handshake.query.token, config.authSecret, function (err, decoded) {
+          if (err) return next(new AuthenticationError())
+          socket.userId = decoded.id
+        })
+      }
+      next()
     } else {
       next(new AuthenticationError())
     }
@@ -23,16 +24,18 @@ module.exports = (io) => {
     .on('connection', function (socket) {
       console.log('connection')
       // Connection now authenticated to receive further events
-      socket.join(socket.roomId)
+      if (socket.accessToken) socket.join(socket.accessToken)
+      if (socket.userId) socket.join(socket.userId)
+
       socket.on('event://blur', async (msg) => {
-        await addReportToCandidateByAccessToken(msg, socket.roomId)
-        const test = await getCandidateAssignedTest(socket.roomId)
-        io.to(test.createdBy.toString()).emit('event://blur', { testId: test._id, msg })
+        const candidateName = await addReportToCandidateByAccessToken(msg, socket.accessToken)
+        const test = await getCandidateAssignedTest(socket.accessToken)
+        io.to(test.createdBy.toString()).emit('event://blur', { testId: test._id, msg: `${candidateName} ${msg}` })
       })
       socket.on('event://focus', async (msg) => {
-        await addReportToCandidateByAccessToken(msg, socket.roomId)
-        const test = await getCandidateAssignedTest(socket.roomId)
-        io.to(test.createdBy.toString()).emit('event://focus', { testId: test._id, msg })
+        const candidateName = await addReportToCandidateByAccessToken(msg, socket.accessToken)
+        const test = await getCandidateAssignedTest(socket.accessToken)
+        io.to(test.createdBy.toString()).emit('event://focus', { testId: test._id, msg: `${candidateName} ${msg}` })
       })
       socket.on('event://examStart', async (msg) => {
         await addReportToCandidateByAccessToken(msg, socket.roomId)
@@ -53,6 +56,7 @@ async function addReportToCandidateByAccessToken (msg, accessToken) {
   })
   candidate.reports.push(msg)
   await candidate.save()
+  return candidate.name
 }
 async function getCandidateAssignedTest (accessToken) {
   const candidate = await Candidate.findOne({

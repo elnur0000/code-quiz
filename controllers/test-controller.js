@@ -112,6 +112,8 @@ exports.invite = asyncWrapper(async (req, res, next) => {
     const invitationUrl = `${req.protocol + '://' + req.get('host')}/test/${accessToken}`
     try {
       await sendEmail(email, 'Codequiz Test Invitation', testInvitationTemplate(invitationUrl), 'html')
+      test.invited++
+      test.incomplete++
       await test.save()
       return res.send(await test.populate('candidates').execPopulate())
     } catch (err) {
@@ -136,6 +138,9 @@ exports.invite = asyncWrapper(async (req, res, next) => {
     const invitationUrl = `${req.protocol + '://' + req.get('host')}/test/${accessToken}`
     await sendEmail(email, 'Codequiz Test Invitation', testInvitationTemplate(invitationUrl), 'html')
   }
+  test.invited += group.users.length
+  test.incomplete += group.users.length
+  await test.save()
   res.send(await test.populate('candidates').execPopulate())
 })
 
@@ -180,9 +185,15 @@ exports.submitCode = asyncWrapper(async (req, res, next) => {
 
   if (!problem) throw new NotFoundError('Problem not found')
 
+  const incomplete = candidate.submittedProblems.length === 0
   candidate.addSubmittedProblem({ problem: problemId, code })
   await candidate.save()
-
+  if (incomplete) {
+    const test = await Test.findById(candidate.assignedTest._id).exec()
+    test.incomplete--
+    test.completed++
+    await test.save()
+  }
   for (const testcase of problem.testcases) {
     const result = await runCodeAgainstTestcase(language, testcase.input, code, testcase.output)
     if (result.stderr) {
