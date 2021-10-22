@@ -1,0 +1,12 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+ "editor.codeActionsOnSave": {
+  "source.fixAll.eslint": true,
+  "source.fixAll.tslint": false
+ },
+ "editor.formatOnSave": false,
+ "search.exclude": {
+   "**/node_modules": true,
+   "**/public": true,
+ },
+}
