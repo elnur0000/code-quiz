@@ -1,6 +1,5 @@
-import { getModelForClass, prop, Ref, isDocumentArray, DocumentType } from '@typegoose/typegoose'
+import { DocumentType, isDocumentArray, prop, Ref } from '@typegoose/typegoose'
 import { ObjectId } from 'mongodb'
-import { Query } from 'mongoose'
 import { ProblemDifficulty, ProblemSkill, Testcase } from '../types'
 import { TestCase } from './test-case'
 import { User } from './user'
@@ -47,27 +46,10 @@ export class Problem {
   testcases: Array<Ref<TestCase>>
 
   @prop({
-    required: [true, 'Please add skills'],
-    enum: [
-      'Strings',
-      'Search',
-      'Sorting',
-      'Bit Manipulation',
-      'Data Structures',
-      'Stacks',
-      'Trees',
-      'Graph Theory',
-      'Linked Lists',
-      'Queues',
-      'Geometry',
-      'Probability',
-      'Mathematics',
-      'Dynamic Programming',
-      'Divide and Conquer',
-      'Recursion'
-    ] as ProblemSkill[]
+    required: [true, 'Please add skills']
+
   })
-  skills: string[]
+  skills: ProblemSkill[]
 
   deleteTestcase (this: DocumentType<Problem>, _id: string): void {
     if (isDocumentArray(this.testcases)) {
@@ -75,11 +57,11 @@ export class Problem {
     }
   }
 
-  updateTestcase (this: DocumentType<Problem>, testcaseId: string, doc: Testcase): Query<any, DocumentType<TestCase>> | undefined {
+  updateTestcase (this: DocumentType<Problem>, testcaseId: string, doc: Partial<Testcase>): void {
     if (isDocumentArray(this.testcases)) {
       const testcase = this.testcases.find(testcase => testcase._id.toString() === testcaseId)
       if (testcase) {
-        return testcase.update(doc)
+        testcase.set(doc)
       }
     }
   }
@@ -90,5 +72,3 @@ export class Problem {
     }
   }
 }
-
-export const ProblemModel = getModelForClass(Problem, { schemaOptions: { timestamps: true } })

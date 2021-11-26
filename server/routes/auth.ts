@@ -11,7 +11,7 @@ const router = express.Router()
 router.post('/register', validator(userValidationSchemas.register), register)
 router.post('/login', validator(userValidationSchemas.login), login)
 router.post('/forgotpassword', validator(userValidationSchemas.forgotPassword), forgotPassword)
-router.put('/resetpassword/:resettoken', validator(userValidationSchemas.resetPassword), resetPassword)
+router.put('/resetpassword/:resetToken', validator(userValidationSchemas.resetPassword), resetPassword)
 
 // private routes
 router.use(protectedRoute)

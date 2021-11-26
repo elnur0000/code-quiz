@@ -11,9 +11,9 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "outDir": "build",
-        "baseUrl": "."
+        "baseUrl": ".",
+        "typeRoots": ["./types/", "./node_modules/@types"]       
     },
-    "include": [
-        "**/*"
-    ]
+    "exclude": ["node_modules"],
+    "files": ["./types/express/index.d.ts"]
 }

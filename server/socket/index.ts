@@ -1,7 +1,8 @@
-import Candidate from '../schemas/candidate'
+// @ts-nocheck
+import { CandidateModel } from '../schemas/candidate'
 import jwt, { VerifyErrors } from 'jsonwebtoken'
 import { AuthenticationError } from '../errors'
-import config from '../config'
+import * as config from '../config'
 import crypto from 'crypto'
 import { Server, Socket } from 'socket.io'
 import {
@@ -33,19 +34,22 @@ export default (io: Server): void => {
       if (socket.accessToken) socket.join(socket.accessToken)
       if (socket.userId) socket.join(socket.userId)
 
-      socket.on(BLUR, async (msg): unknown => {
+      socket.on(BLUR, async (msg: string): unknown => {
         const candidateName = await addReportToCandidateByAccessToken(msg, socket.accessToken)
         const test = await getCandidateAssignedTest(socket.accessToken)
         io.to(test.createdBy.toString()).emit(BLUR, { testId: test._id, msg: `${candidateName} ${msg}` })
       })
+      // eslint-disable-next-line
       socket.on(FOCUS, async (msg) => {
         const candidateName = await addReportToCandidateByAccessToken(msg, socket.accessToken)
         const test = await getCandidateAssignedTest(socket.accessToken)
         io.to(test.createdBy.toString()).emit(FOCUS, { testId: test._id, msg: `${candidateName} ${msg}` })
       })
+      // eslint-disable-next-line
       socket.on(EXAM_START, async (msg) => {
         await addReportToCandidateByAccessToken(msg, socket.roomId)
       })
+      // eslint-disable-next-line
       socket.on(EXAM_END, async (msg) => {
         await addReportToCandidateByAccessToken(msg, socket.roomId)
       })
@@ -53,7 +57,7 @@ export default (io: Server): void => {
 }
 
 async function addReportToCandidateByAccessToken (msg: string, accessToken: string): Promise<string> {
-  const candidate = await Candidate.findOne({
+  const candidate = await CandidateModel.findOne({
     accessToken: crypto
       .createHash('sha256')
       .update(accessToken)
@@ -65,7 +69,7 @@ async function addReportToCandidateByAccessToken (msg: string, accessToken: stri
   return candidate.name
 }
 async function getCandidateAssignedTest (accessToken: string): Promise<any> {
-  const candidate = await Candidate.findOne({
+  const candidate = await CandidateModel.findOne({
     accessToken: crypto
       .createHash('sha256')
       .update(accessToken)

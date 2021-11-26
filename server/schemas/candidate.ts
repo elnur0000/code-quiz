@@ -1,7 +1,6 @@
-import { getModelForClass, prop, Ref, DocumentType, isDocumentArray } from '@typegoose/typegoose'
+import { DocumentType, isDocumentArray, prop, Ref } from '@typegoose/typegoose'
 import crypto from 'crypto'
 import { ObjectId } from 'mongodb'
-import { Query } from 'mongoose'
 import { Submission } from './submission'
 import { Test } from './test'
 
@@ -50,14 +49,14 @@ export class Candidate {
   })
   expiresAt: Date
 
-  addSubmittedProblem (this: DocumentType<Candidate>, doc: DocumentType<Submission>): Query<any, DocumentType<Submission>> | undefined {
+  addSubmittedProblem (this: DocumentType<Candidate>, doc: DocumentType<Submission>): void {
     if (isDocumentArray(this.submittedProblems)) {
       const submittedProblem = this.submittedProblems.find(submittedProblem => submittedProblem.problem?.toString() === doc.problem)
       if (!submittedProblem) {
         this.submittedProblems.push(doc)
         return
       }
-      return submittedProblem.update(doc)
+      submittedProblem.set(doc)
     }
   }
 
@@ -71,5 +70,3 @@ export class Candidate {
     return accessToken
   }
 }
-
-export const CandidateModel = getModelForClass(Candidate, { schemaOptions: { timestamps: true } })

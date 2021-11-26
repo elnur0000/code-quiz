@@ -6,7 +6,7 @@ import {
   AccessDeniedError,
   AuthenticationError,
   NotFoundError,
-  ValidationError
+  BadRequestError
 } from '../errors'
 import {
   Express,
@@ -33,7 +33,7 @@ const notFoundErrorHandler: ErrorRequestHandler = (err: Error, req, res, next) =
 }
 
 const validationErrorHandler: ErrorRequestHandler = (err: Error, req, res, next) => {
-  if (err instanceof ValidationError) {
+  if (err instanceof BadRequestError) {
     return res.status(400).send({ error: { message: err.message } })
   }
   next(err)

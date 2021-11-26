@@ -1,3 +1,4 @@
+import { LanguageNames } from 'compile-run'
 import { ProblemDifficulty, ProblemSkill } from '../../types'
 
 export interface CreateProblemDto {
@@ -24,4 +25,9 @@ export interface AddTestcaseDto {
 export interface EditTestcaseDto {
   input?: string
   output?: string
+}
+
+export interface SubmitProblemDto {
+  code: string
+  language: LanguageNames
 }

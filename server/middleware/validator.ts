@@ -1,4 +1,4 @@
-import { ValidationError } from '../errors'
+import { BadRequestError } from '../errors'
 import { Schema, ValidationResult } from 'joi'
 import { Request, Response, NextFunction } from 'express'
 
@@ -12,7 +12,7 @@ export default function ValidationMiddleware (validationSchema: Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
     const validationResult = validate(req.body, validationSchema)
     if (validationResult.error) {
-      throw new ValidationError(validationResult.error.details[0].message)
+      throw new BadRequestError(validationResult.error.details[0].message)
     } else {
       next()
     }

@@ -1,6 +1,5 @@
-import { getModelForClass, prop, Ref, DocumentType, isDocumentArray } from '@typegoose/typegoose'
+import { DocumentType, isDocumentArray, prop, Ref } from '@typegoose/typegoose'
 import { ObjectId } from 'mongodb'
-import { Query } from 'mongoose'
 import { GroupUser } from './group-user'
 import { User } from './user'
 
@@ -25,10 +24,10 @@ export class Group {
   })
   createdBy: Ref<User>
 
-  updateUser (this: DocumentType<Group>, _id: string, doc: GroupUser): Query<any, DocumentType<GroupUser>> | undefined {
+  updateUser (this: DocumentType<Group>, _id: string, doc: GroupUser): void {
     if (isDocumentArray(this.users)) {
       const user = this.users.find(user => user._id.toString() === _id)
-      return user?.update(doc)
+      user?.set(doc)
     }
   }
 
@@ -38,5 +37,3 @@ export class Group {
     }
   }
 }
-
-export const GroupModel = getModelForClass(Group, { schemaOptions: { timestamps: true } })

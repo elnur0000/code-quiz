@@ -1,28 +1,32 @@
-export interface RegisterDto {
+export interface RegisterBodyDto {
   name: string
   email: string
   password: string
 }
 
-export interface LoginDto {
+export interface LoginBodyDto {
   email: string
   password: string
 }
 
-export interface ForgotPasswordDto {
+export interface ForgotPasswordBodyDto {
   email: string
 }
 
-export interface ResetPasswordDto {
+export interface ResetPasswordBodyDto {
   password: string
 }
 
-export interface UpdateUserDto {
+export interface ResetPasswordParamsDto {
+  resetToken?: string
+}
+
+export interface UpdateUserBodyDto {
   name: string
   email: string
 }
 
-export interface UpdatePasswordDto {
+export interface UpdatePasswordBodyDto {
   newPassword: string
   currentPassword: string
 }

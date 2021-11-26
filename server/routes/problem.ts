@@ -10,7 +10,8 @@ import {
   getProblem,
   getProblems,
   getTestcases,
-  submitProblem } from '../domains/problem/controller'
+  submitProblem
+} from '../domains/problem/controller'
 import { protectedRoute } from '../middleware/auth'
 import validator from '../middleware/validator'
 
@@ -29,7 +30,7 @@ router
   .delete(deleteProblem)
 
 router
-  .post('/:id/submit', submitProblem)
+  .post('/:id/submit', validator(problemValidationSchemas.submitProblem), submitProblem)
 
 // testcase
 router

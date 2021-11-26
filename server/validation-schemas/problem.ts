@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
-import { AddTestcaseDto, CreateProblemDto, EditProblemDto, EditTestcaseDto } from '../domains/problem/dto'
+import { AddTestcaseDto, CreateProblemDto, EditProblemDto, EditTestcaseDto, SubmitProblemDto } from '../domains/problem/dto'
 import Joi from 'joi'
 import { JoiSchemaMap, ProblemDifficulty, ProblemSkill } from '../types/index'
+import { LanguageNames } from 'compile-run'
 
 export const createProblem = Joi.object().keys(
   {
@@ -76,3 +77,10 @@ export const editTestcase = Joi.object().keys(
     output: Joi.string().required()
   } as JoiSchemaMap<EditTestcaseDto>
 ).min(1)
+
+export const submitProblem = Joi.object().keys(
+  {
+    code: Joi.string().required(),
+    language: Joi.string().valid(['python', 'java', 'node', 'cpp', 'c'] as LanguageNames[]).required()
+  } as JoiSchemaMap<SubmitProblemDto>
+)

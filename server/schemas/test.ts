@@ -1,4 +1,4 @@
-import { DocumentType, getModelForClass, isRefTypeArray, prop, Ref } from '@typegoose/typegoose'
+import { DocumentType, isRefTypeArray, prop, Ref } from '@typegoose/typegoose'
 import { ObjectId } from 'mongodb'
 import { Types } from 'mongoose'
 import { TestLanguageName } from '../types'
@@ -18,7 +18,7 @@ export class Test {
   @prop({ required: true, ref: () => User })
   createdBy: Ref<User>
 
-  @prop({ enum: ['Node.js', 'Java', 'C', 'C++', 'Python'] as TestLanguageName[] })
+  @prop({})
   allowedLanguages?: TestLanguageName[]
 
   @prop({ ref: () => Problem })
@@ -44,5 +44,3 @@ export class Test {
     }
   }
 }
-
-export const TestModel = getModelForClass(Test, { schemaOptions: { timestamps: true } })

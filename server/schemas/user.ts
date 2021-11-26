@@ -1,8 +1,8 @@
-import { getModelForClass, pre, prop } from '@typegoose/typegoose'
+import { pre, prop } from '@typegoose/typegoose'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-import * as config from '../config'
 import { ObjectId } from 'mongodb'
+import * as config from '../config'
 
 @pre<User>('save', async function (next) {
   if (!this.isModified('password')) {
@@ -63,5 +63,3 @@ export class User {
     return await bcrypt.compare(enteredPassword, this.password)
   }
 }
-
-export const UserModel = getModelForClass(User)

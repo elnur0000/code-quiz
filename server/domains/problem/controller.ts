@@ -1,15 +1,22 @@
-import asyncWrapper from '../../utilities/async-wrapper'
-import { sendEmail } from '../../utilities/mailer'
-import { User } from '../../schemas/user'
-import Problem from '../../schemas/problem'
-import { AuthenticationError, ValidationError, NotFoundError } from '../../errors'
+import { isDocumentArray } from '@typegoose/typegoose'
+import { Request } from 'express'
+import { NotFoundError } from '../../errors'
+import {
+  ProblemModel
+} from '../../schemas'
 import { runCode } from '../../services/compile-run'
+import asyncWrapper from '../../utilities/async-wrapper'
+import {
+  AddTestcaseDto,
+  CreateProblemDto, EditProblemDto,
+  EditTestcaseDto, SubmitProblemDto
+} from './dto'
 
 // @desc      Create a problem
 // @route     POST /api/v1/problems
 // @access    Private
-export const createProblem = asyncWrapper(async (req, res, next) => {
-  const problem = await Problem.create({ ...req.body, createdBy: req.user._id })
+export const createProblem = asyncWrapper(async (req: Request<{}, {}, CreateProblemDto>, res, next) => {
+  const problem = await ProblemModel.create({ ...req.body, createdBy: req.user._id })
   res.send(problem)
 })
 
@@ -18,14 +25,14 @@ export const createProblem = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const getProblems = asyncWrapper(async (req, res, next) => {
   const { offset, limit } = req.params
-  const problems = await Problem.find({
+  const problems = await ProblemModel.find({
     $or: [
       { createdBy: req.user._id },
       { status: 'Public' }
     ]
   })
-    .skip(offset || 0)
-    .limit(limit || 0)
+    .skip(offset ? parseInt(offset, 10) : 0)
+    .limit(limit ? parseInt(limit, 10) : 0)
     .exec()
   res.send(problems)
 })
@@ -35,7 +42,7 @@ export const getProblems = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const getProblem = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
-  const problem = await Problem.findOne({
+  const problem = await ProblemModel.findOne({
     _id,
     $or: [
       {
@@ -53,11 +60,11 @@ export const getProblem = asyncWrapper(async (req, res, next) => {
 // @desc      Submit a demo problem
 // @route     POST /api/v1/problems/:id/submit
 // @access    Private
-export const submitProblem = asyncWrapper(async (req, res, next) => {
+export const submitProblem = asyncWrapper(async (req: Request<any, {}, SubmitProblemDto>, res, next) => {
   const { code, language } = req.body
   const _id = req.params.id
 
-  const problem = await Problem.findOne({
+  const problem = await ProblemModel.findOne({
     _id,
     $or: [
       {
@@ -70,13 +77,19 @@ export const submitProblem = asyncWrapper(async (req, res, next) => {
   }).exec()
   if (!problem) throw new NotFoundError('Problem not found')
 
-  for (const testcase of problem.testcases) {
-    const result = await runCode(language, testcase.input, code, testcase.output)
-    if (result.stderr) {
-      return res.send({ success: false, stderr: result.stderr.slice(result.stderr.indexOf(',') + 1) })
-    }
-    if (!result.passed) {
-      return res.send({ success: false, ...result })
+  if (isDocumentArray(problem.testcases)) {
+    for (const testcase of problem.testcases) {
+      if (testcase) {
+        const result = await runCode(language, testcase.input, code)
+        if (result.stderr) {
+          res.send({ success: false, stderr: result.stderr.slice(result.stderr.indexOf(',') + 1) })
+          return
+        }
+        if (result.stdout !== testcase.output) {
+          res.send({ success: false, ...result })
+          return
+        }
+      }
     }
   }
 
@@ -86,9 +99,9 @@ export const submitProblem = asyncWrapper(async (req, res, next) => {
 // @desc      edit a problem
 // @route     PUT /api/v1/problems/:id
 // @access    Private
-export const editProblem = asyncWrapper(async (req, res, next) => {
+export const editProblem = asyncWrapper(async (req: Request<any, {}, EditProblemDto>, res, next) => {
   const _id = req.params.id
-  const problem = await Problem.findOneAndUpdate({
+  const problem = await ProblemModel.findOneAndUpdate({
     _id,
     $or: [
       {
@@ -110,7 +123,7 @@ export const editProblem = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const deleteProblem = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
-  const result = await Problem.deleteOne({
+  const result = await ProblemModel.deleteOne({
     _id,
     $or: [
       {
@@ -130,9 +143,9 @@ export const deleteProblem = asyncWrapper(async (req, res, next) => {
 // @desc      add testcase to a problem
 // @route     POST /api/v1/problems/:id/testcases
 // @access    Private
-export const addTestcase = asyncWrapper(async (req, res, next) => {
+export const addTestcase = asyncWrapper(async (req: Request<any, {}, AddTestcaseDto>, res, next) => {
   const _id = req.params.id
-  const problem = await Problem.findOne({
+  const problem = await ProblemModel.findOne({
     _id,
     $or: [
       {
@@ -146,6 +159,7 @@ export const addTestcase = asyncWrapper(async (req, res, next) => {
 
   if (!problem) throw new NotFoundError('Problem not found')
 
+  // @ts-expect-error
   problem.testcases.push(req.body)
 
   await problem.save()
@@ -158,7 +172,7 @@ export const addTestcase = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const getTestcases = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
-  const testcases = await Problem.findOne({
+  const testcases = await ProblemModel.findOne({
     _id,
     $or: [
       {
@@ -176,10 +190,10 @@ export const getTestcases = asyncWrapper(async (req, res, next) => {
 // @desc      edit a testcase
 // @route     PUT /api/v1/problems/:id/testcases/:testcaseId
 // @access    Private
-export const editTestcase = asyncWrapper(async (req, res, next) => {
+export const editTestcase = asyncWrapper(async (req: Request<any, {}, EditTestcaseDto>, res, next) => {
   const _id = req.params.id
   const testcaseId = req.params.testcaseId
-  const problem = await Problem.findOne({
+  const problem = await ProblemModel.findOne({
     _id,
     $or: [
       {
@@ -206,7 +220,7 @@ export const editTestcase = asyncWrapper(async (req, res, next) => {
 export const deleteTestcase = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
   const testcaseId = req.params.testcaseId
-  const problem = await Problem.findOne({
+  const problem = await ProblemModel.findOne({
     _id,
     $or: [
       {

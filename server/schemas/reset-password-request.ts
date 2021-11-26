@@ -1,4 +1,5 @@
-import { getModelForClass, prop, Ref, ReturnModelType, DocumentType } from '@typegoose/typegoose'
+import { DocumentType, prop, Ref, ReturnModelType } from '@typegoose/typegoose'
+import * as schemas from './index'
 import crypto from 'crypto'
 import { ObjectId } from 'mongodb'
 import { User } from './user'
@@ -50,8 +51,6 @@ export class ResetPasswordRequest {
       attempts: 0,
       createdAt: new Date()
     }
-    return new ResetPasswordRequestModel(resetPasswordRequest)
+    return new schemas.ResetPasswordRequestModel(resetPasswordRequest)
   }
 }
-
-export const ResetPasswordRequestModel = getModelForClass(ResetPasswordRequest)

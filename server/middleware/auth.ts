@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import * as config from '../config'
 import { AuthenticationError } from '../errors'
-import { UserModel } from '../schemas/user'
+import { UserModel } from '../schemas'
 import {
   JwtUserPayload, RequestUser
 } from '../types/index'

@@ -1,31 +1,32 @@
 import {
-  ForgotPasswordDto,
-  LoginDto,
-  RegisterDto,
-  ResetPasswordDto,
-  UpdatePasswordDto,
-  UpdateUserDto
+  ForgotPasswordBodyDto,
+  LoginBodyDto,
+  RegisterBodyDto,
+  ResetPasswordBodyDto,
+  ResetPasswordParamsDto,
+  UpdatePasswordBodyDto,
+  UpdateUserBodyDto
 } from './dto'
-import {
-  IRequest
-} from '../../types/index'
+import { Request } from 'express'
 import crypto from 'crypto'
 // const ErrorResponse = require('../utils/errorResponse')
 import asyncWrapper from '../../utilities/async-wrapper'
 import { sendEmail } from '../../utilities/mailer'
-import User from '../../schemas/user'
-import ResetPasswordRequest from '../../schemas/reset-password-request'
-import { AuthenticationError, ValidationError, NotFoundError } from '../../errors'
+import {
+  UserModel,
+  ResetPasswordRequestModel
+} from '../../schemas'
+import { AuthenticationError, BadRequestError, NotFoundError } from '../../errors'
 import { resetPasswordTemplate } from '../../utilities/email-templates'
 
 // @desc      Register user
 // @route     POST /api/v1/auth/register
 // @access    Public
-export const register = asyncWrapper(async (req: IRequest<RegisterDto>, res, next) => {
-  if (await User.exists({ email: req.body.email })) {
-    throw new ValidationError('There is already an account with that email')
+export const register = asyncWrapper(async (req: Request<{}, {}, RegisterBodyDto>, res, next) => {
+  if (await UserModel.exists({ email: req.body.email })) {
+    throw new BadRequestError('There is already an account with that email')
   }
-  const user = await User.create(req.body)
+  const user = await UserModel.create(req.body)
   const token = user.getSignedJwtToken()
   res.send({ token })
 })
@@ -33,10 +34,10 @@ export const register = asyncWrapper(async (req: IRequest<RegisterDto>, res, nex
 // @desc      Login user
 // @route     POST /api/v1/auth/login
 // @access    Public
-export const login = asyncWrapper(async (req: IRequest<LoginDto>, res, next) => {
+export const login = asyncWrapper(async (req: Request<{}, {}, LoginBodyDto>, res, next) => {
   const { email, password } = req.body
 
-  const user = await User.findOne({ email }).select('+password').exec()
+  const user = await UserModel.findOne({ email }).select('+password').exec()
 
   if (!user) {
     throw new AuthenticationError('Invalid credentials')
@@ -55,8 +56,8 @@ export const login = asyncWrapper(async (req: IRequest<LoginDto>, res, next) => 
 // @desc      Get current logged in user
 // @route     POST /api/v1/auth/me
 // @access    Private
-export const getMe = asyncWrapper(async (req: IRequest, res, next) => {
-  const user = await User.findById(req.user._id).exec()
+export const getMe = asyncWrapper(async (req, res, next) => {
+  const user = await UserModel.findById(req.user._id).exec()
 
   res.send(user)
 })
@@ -64,8 +65,8 @@ export const getMe = asyncWrapper(async (req: IRequest, res, next) => {
 // @desc      Update user details
 // @route     PUT /api/v1/auth/updatedetails
 // @access    Private
-export const updateDetails = asyncWrapper(async (req: IRequest<UpdateUserDto>, res, next) => {
-  const user = await User.findByIdAndUpdate(req.user._id, req.body, {
+export const updateDetails = asyncWrapper(async (req: Request<{}, {}, UpdateUserBodyDto>, res, next) => {
+  const user = await UserModel.findByIdAndUpdate(req.user._id, req.body, {
     new: true,
     runValidators: true
   }).exec()
@@ -76,9 +77,12 @@ export const updateDetails = asyncWrapper(async (req: IRequest<UpdateUserDto>, r
 // @desc      Update password
 // @route     PUT /api/v1/auth/updatepassword
 // @access    Private
-export const updatePassword = asyncWrapper(async (req: IRequest<UpdatePasswordDto>, res, next) => {
-  const user = await User.findById(req.user._id).select('+password').exec()
+export const updatePassword = asyncWrapper(async (req: Request<{}, {}, UpdatePasswordBodyDto>, res, next) => {
+  const user = await UserModel.findById(req.user._id).select('+password').exec()
 
+  if (!user) {
+    throw new NotFoundError('User not found')
+  }
   if (!(await user.matchPassword(req.body.currentPassword))) {
     throw new AuthenticationError('Password is incorrect')
   }
@@ -93,16 +97,17 @@ export const updatePassword = asyncWrapper(async (req: IRequest<UpdatePasswordDt
 // @desc      Forgot password
 // @route     POST /api/v1/auth/forgotpassword
 // @access    Public
-export const forgotPassword = asyncWrapper(async (req: IRequest<ForgotPasswordDto>, res, next) => {
-  const user = await User.findOne({
+export const forgotPassword = asyncWrapper(async (req: Request<{}, {}, ForgotPasswordBodyDto>, res, next) => {
+  const user = await UserModel.findOne({
     email: req.body.email
   }).exec()
 
   if (!user) {
     throw new NotFoundError('There is no user with that email')
   }
-  if (user.resetRequestLockedUntil > new Date()) {
-    return res.send({ lockedUntil: user.resetRequestLockedUntil })
+  if (user.resetRequestLockedUntil && (user.resetRequestLockedUntil > new Date())) {
+    res.send({ lockedUntil: user.resetRequestLockedUntil })
+    return
   }
 
   if (user.resetAttempts === 3) {
@@ -116,7 +121,7 @@ export const forgotPassword = asyncWrapper(async (req: IRequest<ForgotPasswordDt
   }
   await user.save()
 
-  const resetPasswordRequest = ResetPasswordRequest.build(user._id)
+  const resetPasswordRequest = ResetPasswordRequestModel.build(user._id)
   await resetPasswordRequest.save()
 
   const resetToken = resetPasswordRequest.token
@@ -140,26 +145,30 @@ export const forgotPassword = asyncWrapper(async (req: IRequest<ForgotPasswordDt
 // @desc      Reset password
 // @route     PUT /api/v1/auth/resetpassword/:resettoken
 // @access    Public
-export const resetPassword = asyncWrapper(async (req, res, next) => {
+export const resetPassword = asyncWrapper(async (req: Request<ResetPasswordParamsDto, {}, ResetPasswordBodyDto>, res, next) => {
+  if (!req.params.resetToken) {
+    throw new BadRequestError('Reset token is required')
+  }
   const resetPasswordToken = crypto
     .createHash('sha256')
-    .update(req.params.resettoken)
+    .update(req.params.resetToken)
     .digest('hex')
-
-  const resetPasswordRequest = await ResetPasswordRequest.findOne({
+  const resetPasswordRequest = await ResetPasswordRequestModel.findOne({
     token: resetPasswordToken,
     expiresAt: { $gt: new Date() }
   }).exec()
 
   if (!resetPasswordRequest) {
-    throw new ValidationError('Invalid token')
+    throw new BadRequestError('Invalid token')
   }
 
-  const user = await User.findById(resetPasswordRequest.user).exec()
-  user.password = req.body.password
+  const user = await UserModel.findById(resetPasswordRequest.user).exec()
+  if (user) {
+    user.password = req.body.password
 
-  await user.save()
-  await resetPasswordRequest.remove()
+    await user.save()
+    await resetPasswordRequest.remove()
+  }
 
   res.send()
 })

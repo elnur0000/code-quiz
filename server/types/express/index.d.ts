@@ -1,7 +1,6 @@
 import {
   RequestUser
-} from './index'
-
+} from '../index'
 declare global {
   namespace Express {
     interface Request {

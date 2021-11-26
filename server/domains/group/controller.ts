@@ -1,13 +1,14 @@
+import { NotFoundError } from '../../errors'
+import {
+  GroupModel
+} from '../../schemas'
 import asyncWrapper from '../../utilities/async-wrapper'
-import { sendEmail } from '../../utilities/mailer'
-import Group from '../../schemas/group'
-import { AuthenticationError, ValidationError, NotFoundError } from '../../errors'
 
 // @desc      Create a group
 // @route     POST /api/v1/groups
 // @access    Private
 export const createGroup = asyncWrapper(async (req, res, next) => {
-  const group = await Group.create({ ...req.body, createdBy: req.user._id })
+  const group = await GroupModel.create({ ...req.body, createdBy: req.user._id })
 
   res.send(group)
 })
@@ -17,11 +18,11 @@ export const createGroup = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const getGroups = asyncWrapper(async (req, res, next) => {
   const { offset, limit } = req.params
-  const groups = await Group.find({
+  const groups = await GroupModel.find({
     createdBy: req.user._id
   })
-    .skip(offset || 0)
-    .limit(limit || 0)
+    .skip(offset ? parseInt(offset, 10) : 0)
+    .limit(limit ? parseInt(limit, 10) : 0)
     .exec()
   res.send(groups)
 })
@@ -31,7 +32,7 @@ export const getGroups = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const editGroup = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
-  const group = await Group.findOneAndUpdate({
+  const group = await GroupModel.findOneAndUpdate({
     _id,
     createdBy: req.user._id
   }, req.body, { new: true }).exec()
@@ -46,7 +47,7 @@ export const editGroup = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const deleteGroup = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
-  const result = await Group.deleteOne({
+  const result = await GroupModel.deleteOne({
     _id,
     createdBy: req.user._id
   }).exec()
@@ -61,7 +62,7 @@ export const deleteGroup = asyncWrapper(async (req, res, next) => {
 // @access    Private
 export const addUser = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
-  const group = await Group.findOne({
+  const group = await GroupModel.findOne({
     _id,
     createdBy: req.user._id
   }).exec()
@@ -81,7 +82,7 @@ export const addUser = asyncWrapper(async (req, res, next) => {
 export const editUser = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
   const { userId } = req.params
-  const group = await Group.findOne({
+  const group = await GroupModel.findOne({
     _id,
     createdBy: req.user._id
   }).exec()
@@ -101,7 +102,7 @@ export const editUser = asyncWrapper(async (req, res, next) => {
 export const deleteUser = asyncWrapper(async (req, res, next) => {
   const _id = req.params.id
   const { userId } = req.params
-  const group = await Group.findOne({
+  const group = await GroupModel.findOne({
     _id,
     createdBy: req.user._id
   }).exec()

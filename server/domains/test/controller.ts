@@ -1,22 +1,24 @@
-import * as config from '../../config'
+import { isDocumentArray, isRefType } from '@typegoose/typegoose'
 import crypto from 'crypto'
 import { Request } from 'express'
-import { NotFoundError, ValidationError } from '../../errors'
-import { CandidateModel } from '../../schemas/candidate'
-import { GroupModel } from '../../schemas/group'
-import { ProblemModel } from '../../schemas/problem'
-import { TestModel } from '../../schemas/test'
+import { Types } from 'mongoose'
+import * as config from '../../config'
+import { BadRequestError, NotFoundError } from '../../errors'
+import {
+  CandidateModel,
+  GroupModel,
+  ProblemModel,
+  TestModel
+} from '../../schemas'
 import * as compileRunService from '../../services/compile-run'
+import { GroupUser } from '../../types'
 import asyncWrapper from '../../utilities/async-wrapper'
 import { testInvitationTemplate } from '../../utilities/email-templates'
 import { sendEmail } from '../../utilities/mailer'
 import {
-  CreateTestBodyDto,
-  EditTestBodyDto,
-  GetTestsQueryParamsDto, RunCodeBodyDto, SubmitCodeBodyDto,
-  SubmitCodeQueryDto, GetTestParamsDto, EditTestParamsDto, DeleteTestParamsDto
+  CreateTestBodyDto, DeleteTestParamsDto, EditTestBodyDto, EditTestParamsDto, GetTestParamsDto, GetTestsQueryParamsDto, RunCodeBodyDto, SubmitCodeBodyDto,
+  SubmitCodeQueryDto
 } from './dto'
-import { GroupUser } from '../../types'
 
 // @desc      Create a test
 // @route     POST /api/v1/tests
@@ -50,7 +52,7 @@ export const getTests = asyncWrapper(async (req: Request<{}, {}, {}, GetTestsQue
 // @route     GET /api/v1/tests/:accessToken
 // @access    Public
 export const getTest = asyncWrapper(async (req: Request<GetTestParamsDto>, res, next) => {
-  if (!req.params.accessToken) throw new ValidationError('Access token is required')
+  if (!req.params.accessToken) throw new BadRequestError('Access token is required')
   const accessToken = crypto
     .createHash('sha256')
     .update(req.params.accessToken)
@@ -66,7 +68,7 @@ export const getTest = asyncWrapper(async (req: Request<GetTestParamsDto>, res, 
     }
   }).exec()
   if (!candidate) throw new NotFoundError('Invalid token or invitation is expired')
-  if (!candidate.assignedTest) throw new NotFoundError('Assigned {TestModel} no longer exist')
+  if (!candidate.assignedTest) throw new NotFoundError('Assigned test no longer exist')
   res.send(candidate.assignedTest)
 })
 
@@ -80,7 +82,7 @@ export const editTest = asyncWrapper(async (req: Request<EditTestParamsDto, {}, 
     createdBy: req.user._id
   }, req.body, { new: true }).exec()
 
-  if (!test) throw new NotFoundError('{TestModel} not found')
+  if (!test) throw new NotFoundError('test not found')
 
   res.send(test)
 })
@@ -95,7 +97,7 @@ export const deleteTest = asyncWrapper(async (req: Request<DeleteTestParamsDto>,
     createdBy: req.user._id
   }).exec()
 
-  if (!result || !result.ok || !result.deletedCount) throw new NotFoundError('{TestModel} not found')
+  if (!result || !result.ok || !result.deletedCount) throw new NotFoundError('test not found')
 
   res.send()
 })
@@ -112,7 +114,7 @@ export const invite = asyncWrapper(async (req, res, next) => {
     createdBy: req.user._id
   }).exec()
 
-  if (!test) throw new NotFoundError('{TestModel} not found')
+  if (!test) throw new NotFoundError('test not found')
 
   if (!groupId) {
     const candidate = new CandidateModel({ name, email, validFrom, expiresAt, assignedTest: test._id })
@@ -123,7 +125,7 @@ export const invite = asyncWrapper(async (req, res, next) => {
     try {
       await sendEmail({
         to: email,
-        subject: 'Codequiz {TestModel} Invitation',
+        subject: 'Codequiz test Invitation',
         html: testInvitationTemplate(invitationUrl)
       })
       test.invited++
@@ -152,7 +154,7 @@ export const invite = asyncWrapper(async (req, res, next) => {
     const invitationUrl = `${config.frontendUrl}/test/${accessToken}`
     await sendEmail({
       to: email,
-      subject: 'Codequiz {TestModel} Invitation',
+      subject: 'Codequiz test Invitation',
       html: testInvitationTemplate(invitationUrl)
     })
   }
@@ -181,7 +183,7 @@ export const runCode = asyncWrapper(async (req, res, next) => {
 export const submitCode = asyncWrapper(async (req: Request<{}, {}, SubmitCodeBodyDto, SubmitCodeQueryDto>, res, next) => {
   const { code, language, problemId } = req.body
   let { accessToken } = req.query
-  if (!accessToken) throw new ValidationError('Access token is required')
+  if (!accessToken) throw new BadRequestError('Access token is required')
   accessToken = crypto
     .createHash('sha256')
     .update(accessToken)
@@ -196,39 +198,48 @@ export const submitCode = asyncWrapper(async (req: Request<{}, {}, SubmitCodeBod
 
   if (!candidate) throw new NotFoundError('Invalid token or invitation is expired')
 
-  if (!candidate.assignedTest) throw new NotFoundError('Assigned {TestModel} no longer exist')
+  if (!candidate.assignedTest) throw new NotFoundError('Assigned test no longer exist')
 
-  if (candidate.assignedTest.problems.findIndex((problem) => problem._id.toString() === problemId) === -1) throw new NotFoundError("ProblemModel isn't attached to the test")
+  if (!isRefType(candidate.assignedTest, Types.ObjectId)) {
+    if (candidate.assignedTest.problems.findIndex((problem) => problem && !isRefType(problem, Types.ObjectId) && problem._id.toString() === problemId) === -1) throw new NotFoundError("ProblemModel isn't attached to the test")
+  }
 
   const problem = await ProblemModel.findById(problemId).exec()
 
   if (!problem) throw new NotFoundError('ProblemModel not found')
 
   const incomplete = candidate.submittedProblems.length === 0
+  // @ts-expect-error
   candidate.addSubmittedProblem({ problem: problemId, code })
   await candidate.save()
   if (incomplete) {
-    const test = await TestModel.findById(candidate.assignedTest._id).exec()
-    test.incomplete--
-    test.completed++
-    await test.save()
-  }
-  for (const testcase of problem.testcases) {
-    const result = await compileRunService.runCode(language, testcase.input, code)
-    if (result.stderr) {
-      res.send({ success: false, stderr: result.stderr.slice(result.stderr.indexOf(',') + 1) })
-      return
+    if (!isRefType(candidate.assignedTest, Types.ObjectId)) {
+      const test = await TestModel.findById(candidate.assignedTest._id).exec()
+      if (test) {
+        test.incomplete--
+        test.completed++
+        await test.save()
+      }
     }
-    if (!result.passed) {
-      res.send({
-        success: false,
-        // TODO: not sure about trimming, verify that it's needed
-        passed: result.stdout.trim() === testcase.output.trim(),
-        stdin: testcase.input,
-        expectedStdout: testcase.output,
-        ...result
-      })
-      return
+  }
+
+  if (isDocumentArray(problem.testcases)) {
+    for (const testcase of problem.testcases) {
+      const result = await compileRunService.runCode(language, testcase.input, code)
+      if (result.stderr) {
+        res.send({ success: false, stderr: result.stderr.slice(result.stderr.indexOf(',') + 1) })
+        return
+      }
+      if (result.stdout !== testcase.output) {
+        res.send({
+          success: false,
+          passed: result.stdout.trim() === testcase.output.trim(),
+          stdin: testcase.input,
+          expectedStdout: testcase.output,
+          ...result
+        })
+        return
+      }
     }
   }
   res.send({ success: true, testcaseCount: problem.testcases.length })
